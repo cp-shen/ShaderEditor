@@ -19,6 +19,7 @@ set(IMGUI_SOURCES
 
 add_library(imgui_glfw_opengl3 SHARED ${IMGUI_SOURCES})
 target_include_directories(imgui_glfw_opengl3 PUBLIC imgui)
+target_compile_definitions(imgui_glfw_opengl3 PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW)
 
 find_package(glfw3 3.3 REQUIRED)
 target_link_libraries(imgui_glfw_opengl3 PUBLIC glfw)
