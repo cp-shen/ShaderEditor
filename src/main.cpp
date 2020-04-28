@@ -15,6 +15,18 @@ static void error_callback(int error, const char *description) {
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
+GLuint do_offscreen_rendering() {
+    // configure global opengl state
+    // -----------------------------
+    glEnable(GL_DEPTH_TEST);
+
+    // build and compile shaders
+    // -------------------------
+    // TODO
+
+    return 0;
+};
+
 int main(int, char **) {
     // Setup window
     glfwSetErrorCallback(error_callback);
@@ -189,6 +201,10 @@ int main(int, char **) {
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                         1000.0f / ImGui::GetIO().Framerate,
                         ImGui::GetIO().Framerate);
+
+            // OpenGL offscreen rendering
+            // TODO ImGui::GetWindowDrawList()->AddImage();
+
             ImGui::End();
         }
 

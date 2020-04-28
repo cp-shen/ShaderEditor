@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
+# imgui part
+# ----------
+
 set(IMGUI_SOURCES
     imgui/imconfig.h
     imgui/imgui.cpp
@@ -32,3 +35,8 @@ set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
 target_link_libraries(imgui_glfw_opengl3 PUBLIC OpenGL::GL)
 
+# stb part
+# --------
+
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE stb)

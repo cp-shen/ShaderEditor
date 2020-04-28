@@ -11,9 +11,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_subdirectory(libs)
 
 set(SHADER_EDITOR_SOURCES
-    src/main.cpp)
+    src/main.cpp
+    src/framebuffers.cpp
+    )
 add_executable(shader_editor ${SHADER_EDITOR_SOURCES})
 
 target_include_directories(shader_editor PRIVATE include)
 target_include_directories(shader_editor PRIVATE libs)
 target_link_libraries(shader_editor PRIVATE imgui_glfw_opengl3)
+target_link_libraries(shader_editor PRIVATE stb)
