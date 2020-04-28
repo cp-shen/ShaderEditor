@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(shader-editor-project)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/lib)
@@ -13,6 +13,7 @@ add_subdirectory(libs)
 set(SHADER_EDITOR_SOURCES
     src/main.cpp
     src/framebuffers.cpp
+    src/renderer.cpp
     )
 add_executable(shader_editor ${SHADER_EDITOR_SOURCES})
 

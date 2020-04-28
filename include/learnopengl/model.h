@@ -9,7 +9,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #include <learnopengl/mesh.h>
@@ -218,7 +217,7 @@ class Model {
     }
 };
 
-unsigned int TextureFromFile(const char *path, const string &directory,
+inline unsigned int TextureFromFile(const char *path, const string &directory,
                              bool gamma) {
     string filename = string(path);
     filename = directory + '/' + filename;

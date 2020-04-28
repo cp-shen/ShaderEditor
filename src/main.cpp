@@ -2,30 +2,37 @@
 // programmable pipeline If you are new to ImGui, see examples/README.txt and
 // documentation at the top of imgui.cpp.
 
+#include <iostream>
 #include <stdio.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+
 #include <imgui/examples/imgui_impl_glfw.h>
 #include <imgui/examples/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
+
+#include <common.h>
+#include <learnopengl/camera.h>
+#include <learnopengl/filesystem.h>
+#include <learnopengl/model.h>
+#include <learnopengl/shader_m.h>
+
+using namespace std;
+
+static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+static float lastX = (float)SCR_WIDTH / 2.0;
+static float lastY = (float)SCR_HEIGHT / 2.0;
 
 static void error_callback(int error, const char *description) {
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
-GLuint do_offscreen_rendering() {
-    // configure global opengl state
-    // -----------------------------
-    glEnable(GL_DEPTH_TEST);
+unsigned int loadTexture(const char *path);
 
-    // build and compile shaders
-    // -------------------------
-    // TODO
-
-    return 0;
-};
+GLuint do_offscreen_rendering(Camera &);
 
 int main(int, char **) {
     // Setup window
@@ -201,10 +208,6 @@ int main(int, char **) {
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                         1000.0f / ImGui::GetIO().Framerate,
                         ImGui::GetIO().Framerate);
-
-            // OpenGL offscreen rendering
-            // TODO ImGui::GetWindowDrawList()->AddImage();
-
             ImGui::End();
         }
 
@@ -220,6 +223,20 @@ int main(int, char **) {
                 show_another_window = false;
             ImGui::End();
         }
+
+        ImGui::Begin("Game rendering");
+        {
+            // OpenGL offscreen rendering
+            auto texId = do_offscreen_rendering(camera);
+            ImVec2 pos = ImGui::GetCursorScreenPos();
+
+            ImGui::GetWindowDrawList()->AddImage(
+                (void *)texId,
+                ImVec2(ImGui::GetItemRectMin().x + pos.x,
+                       ImGui::GetItemRectMin().y + pos.y),
+                ImVec2(0, 0), ImVec2(1, 1));
+        }
+        ImGui::End();
 
         // Rendering
         ImGui::Render();
