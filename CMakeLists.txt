@@ -14,10 +14,17 @@ set(SHADER_EDITOR_SOURCES
     src/main.cpp
     src/framebuffers.cpp
     src/renderer.cpp
+    src/editor.cpp
     )
-add_executable(shader_editor ${SHADER_EDITOR_SOURCES})
+
+set(SHADER_EDITOR_HEADERS
+    include/common.h
+    )
+
+add_executable(shader_editor ${SHADER_EDITOR_SOURCES} ${SHADER_EDITOR_HEADERS})
 
 target_include_directories(shader_editor PRIVATE include)
 target_include_directories(shader_editor PRIVATE libs)
 target_link_libraries(shader_editor PRIVATE imgui_glfw_opengl3)
 target_link_libraries(shader_editor PRIVATE stb)
+target_link_libraries(shader_editor PRIVATE ImGuiColorTextEdit)

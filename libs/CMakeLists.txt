@@ -35,6 +35,17 @@ set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
 target_link_libraries(imgui_glfw_opengl3 PUBLIC OpenGL::GL)
 
+# ImGuiColorTextEdit
+# ------------------
+
+add_library(ImGuiColorTextEdit STATIC
+    ImGuiColorTextEdit/TextEditor.h
+    ImGuiColorTextEdit/TextEditor.cpp
+    )
+
+target_include_directories(ImGuiColorTextEdit PUBLIC imgui)
+target_include_directories(ImGuiColorTextEdit PUBLIC ImGuiColorTextEdit)
+
 # stb part
 # --------
 

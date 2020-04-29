@@ -65,3 +65,4 @@ DevLog.md
 bin/
 .clangd/
 imgui.ini
+*.png

@@ -14,25 +14,27 @@
 #include <imgui/examples/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
 
-#include <common.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/filesystem.h>
 #include <learnopengl/model.h>
 #include <learnopengl/shader_m.h>
+
+#include <TextEditor.h>
+#include <common.h>
 
 using namespace std;
 
 static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 static float lastX = (float)SCR_WIDTH / 2.0;
 static float lastY = (float)SCR_HEIGHT / 2.0;
+static TextEditor editor;
+static GLuint texId;
 
 static void error_callback(int error, const char *description) {
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
-unsigned int loadTexture(const char *path);
-
-GLuint do_offscreen_rendering(Camera &);
+void editor_setup(TextEditor &);
 
 int main(int, char **) {
     // Setup window
@@ -98,9 +100,10 @@ int main(int, char **) {
         ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable
     // Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;   // Enable Docking
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport
-                                                        // / Platform Windows
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable
+    // Multi-Viewport
+
     // io.ConfigViewportsNoAutoMerge = true;
     // io.ConfigViewportsNoTaskBarIcon = true;
 
@@ -149,6 +152,9 @@ int main(int, char **) {
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    editor_setup(editor);
+
+    feed_render_resources();
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
@@ -171,17 +177,19 @@ int main(int, char **) {
         // 1. Show the big demo window (Most of the sample code is in
         // ImGui::ShowDemoWindow()! You can browse its code to learn more about
         // Dear ImGui!).
+        ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End
         // pair to created a named window.
+        ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Hello, world!");
         {
             static float f = 0.0f;
             static int counter = 0;
-
-            ImGui::Begin("Hello, world!"); // Create a window called "Hello,
-                                           // world!" and append into it.
 
             ImGui::Text(
                 "This is some useful text."); // Display some text (you can use
@@ -208,11 +216,13 @@ int main(int, char **) {
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                         1000.0f / ImGui::GetIO().Framerate,
                         ImGui::GetIO().Framerate);
-            ImGui::End();
         }
+        ImGui::End();
 
         // 3. Show another simple window.
         if (show_another_window) {
+            ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+            ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
             ImGui::Begin(
                 "Another Window",
                 &show_another_window); // Pass a pointer to our bool variable
@@ -224,17 +234,102 @@ int main(int, char **) {
             ImGui::End();
         }
 
+        ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
         ImGui::Begin("Game rendering");
         {
             // OpenGL offscreen rendering
-            auto texId = do_offscreen_rendering(camera);
+            texId = do_offscreen_rendering(camera);
+
+            // Get the current cursor position (where your window is)
             ImVec2 pos = ImGui::GetCursorScreenPos();
 
+            // ImGui::Image((void *)texId, ImVec2(SCR_WIDTH, SCR_HEIGHT),
+            //              ImVec2(0, 0), ImVec2(1, 1));
+
             ImGui::GetWindowDrawList()->AddImage(
-                (void *)texId,
-                ImVec2(ImGui::GetItemRectMin().x + pos.x,
-                       ImGui::GetItemRectMin().y + pos.y),
-                ImVec2(0, 0), ImVec2(1, 1));
+                (void *)texId, pos,
+                ImVec2(pos.x + SCR_WIDTH, pos.y + SCR_HEIGHT), ImVec2(0, 1),
+                ImVec2(1, 0));
+        }
+        ImGui::End();
+
+        ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(800, 600), ImGuiCond_FirstUseEver);
+        ImGui::Begin("Text Editor Demo", nullptr,
+                     ImGuiWindowFlags_HorizontalScrollbar |
+                         ImGuiWindowFlags_MenuBar);
+        {
+            auto cpos = editor.GetCursorPosition();
+            if (ImGui::BeginMenuBar()) {
+                if (ImGui::BeginMenu("File")) {
+                    if (ImGui::MenuItem("Save")) {
+                        auto textToSave = editor.GetText();
+                        /// save text....
+                    }
+                    if (ImGui::MenuItem("Quit", "Alt-F4"))
+                        break;
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Edit")) {
+                    bool ro = editor.IsReadOnly();
+                    if (ImGui::MenuItem("Read-only mode", nullptr, &ro))
+                        editor.SetReadOnly(ro);
+                    ImGui::Separator();
+
+                    if (ImGui::MenuItem("Undo", "ALT-Backspace", nullptr,
+                                        !ro && editor.CanUndo()))
+                        editor.Undo();
+                    if (ImGui::MenuItem("Redo", "Ctrl-Y", nullptr,
+                                        !ro && editor.CanRedo()))
+                        editor.Redo();
+
+                    ImGui::Separator();
+
+                    if (ImGui::MenuItem("Copy", "Ctrl-C", nullptr,
+                                        editor.HasSelection()))
+                        editor.Copy();
+                    if (ImGui::MenuItem("Cut", "Ctrl-X", nullptr,
+                                        !ro && editor.HasSelection()))
+                        editor.Cut();
+                    if (ImGui::MenuItem("Delete", "Del", nullptr,
+                                        !ro && editor.HasSelection()))
+                        editor.Delete();
+                    if (ImGui::MenuItem("Paste", "Ctrl-V", nullptr,
+                                        !ro && ImGui::GetClipboardText() !=
+                                                   nullptr))
+                        editor.Paste();
+
+                    ImGui::Separator();
+
+                    if (ImGui::MenuItem("Select all", nullptr, nullptr))
+                        editor.SetSelection(
+                            TextEditor::Coordinates(),
+                            TextEditor::Coordinates(editor.GetTotalLines(), 0));
+
+                    ImGui::EndMenu();
+                }
+
+                if (ImGui::BeginMenu("View")) {
+                    if (ImGui::MenuItem("Dark palette"))
+                        editor.SetPalette(TextEditor::GetDarkPalette());
+                    if (ImGui::MenuItem("Light palette"))
+                        editor.SetPalette(TextEditor::GetLightPalette());
+                    if (ImGui::MenuItem("Retro blue palette"))
+                        editor.SetPalette(TextEditor::GetRetroBluePalette());
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenuBar();
+            }
+
+            ImGui::Text(
+                "%6d/%-6d %6d lines  | %s | %s | %s | %s", cpos.mLine + 1,
+                cpos.mColumn + 1, editor.GetTotalLines(),
+                editor.IsOverwrite() ? "Ovr" : "Ins",
+                editor.CanUndo() ? "*" : " ",
+                editor.GetLanguageDefinition().mName.c_str(), "filename here");
+
+            editor.Render("TextEditor");
         }
         ImGui::End();
 
@@ -261,7 +356,15 @@ int main(int, char **) {
         }
 
         glfwSwapBuffers(window);
+
+        static bool saved = false;
+        if (!saved) {
+            save_texture(SCR_WIDTH, SCR_HEIGHT, texId, "out.png");
+            saved = true;
+        }
     }
+
+    free_render_resources();
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

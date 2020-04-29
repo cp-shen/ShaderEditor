@@ -1,27 +1,45 @@
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
+#include <common.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/filesystem.h>
 #include <learnopengl/model.h>
 #include <learnopengl/shader_m.h>
 
-#include <common.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
 
-unsigned int loadTexture(const char *path);
 
-GLuint do_offscreen_rendering(Camera& camera) {
-    /*********************************/
-    /* configure global opengl state */
-    /*********************************/
-    glEnable(GL_DEPTH_TEST);
+struct render_resources_t {
+    GLuint fbo;
+    GLuint fboColorTex;
 
+    GLuint cubeTexture;
+    GLuint floorTexture;
+
+    GLuint cubeVAO;
+    GLuint cubeVBO;
+    GLuint planeVAO;
+    GLuint planeVBO;
+    GLuint quadVAO;
+    GLuint quadVBO;
+
+    Shader *shader;
+    Shader *screenShader;
+};
+
+static render_resources_t r;
+
+void feed_render_resources() {
     /*****************************/
     /* build and compile shaders */
     /*****************************/
-    Shader shader("resources/shaders/framebuffers.vs",
-                  "resources/shaders/framebuffers.fs");
-    Shader screenShader("resources/shaders/framebuffers_screen.vs",
-                        "resources/shaders/framebuffers_screen.fs");
+    r.shader = new Shader("resources/shaders/framebuffers.vs",
+                          "resources/shaders/framebuffers.fs");
+
+    r.screenShader = new Shader("resources/shaders/framebuffers_screen.vs",
+                                "resources/shaders/framebuffers_screen.fs");
 
     /**********************/
     /* set up vertex data */
@@ -66,12 +84,12 @@ GLuint do_offscreen_rendering(Camera& camera) {
 
                             -1.0f, 1.0f, 0.0f, 1.0f,  1.0f,  -1.0f,
                             1.0f,  0.0f, 1.0f, 1.0f,  1.0f,  1.0f};
+
     // cube VAO
-    unsigned int cubeVAO, cubeVBO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &cubeVBO);
-    glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glGenVertexArrays(1, &r.cubeVAO);
+    glGenBuffers(1, &r.cubeVBO);
+    glBindVertexArray(r.cubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, r.cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices,
                  GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -80,12 +98,12 @@ GLuint do_offscreen_rendering(Camera& camera) {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                           (void *)(3 * sizeof(float)));
+
     // plane VAO
-    unsigned int planeVAO, planeVBO;
-    glGenVertexArrays(1, &planeVAO);
-    glGenBuffers(1, &planeVBO);
-    glBindVertexArray(planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glGenVertexArrays(1, &r.planeVAO);
+    glGenBuffers(1, &r.planeVBO);
+    glBindVertexArray(r.planeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, r.planeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices,
                  GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -94,12 +112,12 @@ GLuint do_offscreen_rendering(Camera& camera) {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                           (void *)(3 * sizeof(float)));
+
     // screen quad VAO
-    unsigned int quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glGenVertexArrays(1, &r.quadVAO);
+    glGenBuffers(1, &r.quadVBO);
+    glBindVertexArray(r.quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, r.quadVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices,
                  GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
@@ -108,39 +126,38 @@ GLuint do_offscreen_rendering(Camera& camera) {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
                           (void *)(2 * sizeof(float)));
+
     /*****************/
     /* load textures */
     /*****************/
-    unsigned int cubeTexture = loadTexture(
+    r.cubeTexture = loadTexture(
         FileSystem::getPath("resources/textures/marble.jpg").c_str());
-    unsigned int floorTexture = loadTexture(
+    r.floorTexture = loadTexture(
         FileSystem::getPath("resources/textures/metal.png").c_str());
 
     /************************/
     /* shader configuration */
     /************************/
-    shader.use();
-    shader.setInt("texture1", 0);
+    r.shader->use();
+    r.shader->setInt("texture1", 0);
 
-    screenShader.use();
-    screenShader.setInt("screenTexture", 0);
+    r.screenShader->use();
+    r.screenShader->setInt("screenTexture", 0);
 
     /*****************************/
     /* framebuffer configuration */
     /*****************************/
-    unsigned int framebuffer;
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glGenFramebuffers(1, &r.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, r.fbo);
     // create a color attachment texture
-    unsigned int textureColorbuffer;
-    glGenTextures(1, &textureColorbuffer);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    glGenTextures(1, &r.fboColorTex);
+    glBindTexture(GL_TEXTURE_2D, r.fboColorTex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB,
                  GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                           textureColorbuffer, 0);
+                           r.fboColorTex, 0);
     // create a renderbuffer object for depth and stencil attachment (we won't
     // be sampling these)
     unsigned int rbo;
@@ -156,12 +173,36 @@ GLuint do_offscreen_rendering(Camera& camera) {
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void free_render_resources() {
+    glDeleteVertexArrays(1, &r.cubeVAO);
+    glDeleteVertexArrays(1, &r.planeVAO);
+    glDeleteVertexArrays(1, &r.quadVAO);
+    glDeleteBuffers(1, &r.cubeVBO);
+    glDeleteBuffers(1, &r.planeVBO);
+    glDeleteBuffers(1, &r.quadVBO);
+
+    glDeleteRenderbuffers(1, &r.fbo);
+
+    GLuint textures[] = {r.fboColorTex, r.cubeTexture, r.floorTexture};
+    glDeleteTextures(3, textures);
+
+    delete r.shader;
+    delete r.screenShader;
+}
+
+GLuint do_offscreen_rendering(Camera &camera) {
+    /*********************************/
+    /* configure global opengl state */
+    /*********************************/
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
     // render
     // ------
     // bind to framebuffer and draw scene as we normally would to color
     // texture
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, r.fbo);
     glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for
                              // rendering screen-space quad)
 
@@ -169,50 +210,49 @@ GLuint do_offscreen_rendering(Camera& camera) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    shader.use();
+    r.shader->use();
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 view = camera.GetViewMatrix();
     glm::mat4 projection =
         glm::perspective(glm::radians(camera.Zoom),
                          (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    shader.setMat4("view", view);
-    shader.setMat4("projection", projection);
+    r.shader->setMat4("view", view);
+    r.shader->setMat4("projection", projection);
     // cubes
-    glBindVertexArray(cubeVAO);
+    glBindVertexArray(r.cubeVAO);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, cubeTexture);
+    glBindTexture(GL_TEXTURE_2D, r.cubeTexture);
     model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
-    shader.setMat4("model", model);
+    r.shader->setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-    shader.setMat4("model", model);
+    r.shader->setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     // floor
-    glBindVertexArray(planeVAO);
-    glBindTexture(GL_TEXTURE_2D, floorTexture);
-    shader.setMat4("model", glm::mat4(1.0f));
+    glBindVertexArray(r.planeVAO);
+    glBindTexture(GL_TEXTURE_2D, r.floorTexture);
+    r.shader->setMat4("model", glm::mat4(1.0f));
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad
-                              // isn't discarded due to depth test.
 
-    /************************/
-    /* restore opengl state */
-    /************************/
-    // TODO
-
-    /*************************/
-    /* de-allocate resources */
-    /*************************/
-    glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &planeVAO);
-    glDeleteVertexArrays(1, &quadVAO);
-    glDeleteBuffers(1, &cubeVBO);
-    glDeleteBuffers(1, &planeVBO);
-    glDeleteBuffers(1, &quadVBO);
-
-    return textureColorbuffer;
+    return r.fboColorTex;
 };
+
+void read_pixels_and_save(int w, int h, const char *path) {
+    stbi_flip_vertically_on_write(1);
+    GLsizei bufSize = w * h * 3;
+    GLubyte buf[bufSize];
+    glReadnPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, bufSize, buf);
+    assert(stbi_write_png(path, w, h, 3, buf, 0) && "failed to write png");
+}
+
+void save_texture(int w, int h, GLuint tex, const char *path) {
+    stbi_flip_vertically_on_write(1);
+    GLsizei bufSize = w * h * 3;
+    GLubyte buf[bufSize];
+    glGetTextureImage(tex, 0, GL_RGB, GL_UNSIGNED_BYTE, bufSize, buf);
+    assert(stbi_write_png(path, w, h, 3, buf, 0) && "failed to write png");
+}
