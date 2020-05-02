@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include <common.h>
+#include <imgui/imgui.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/filesystem.h>
 #include <learnopengl/model.h>
@@ -9,7 +10,6 @@
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
-
 
 struct render_resources_t {
     GLuint fbo;
@@ -255,4 +255,40 @@ void save_texture(int w, int h, GLuint tex, const char *path) {
     GLubyte buf[bufSize];
     glGetTextureImage(tex, 0, GL_RGB, GL_UNSIGNED_BYTE, bufSize, buf);
     assert(stbi_write_png(path, w, h, 3, buf, 0) && "failed to write png");
+}
+
+void process_camara_input(Camera &camera) {
+    IM_ASSERT(ImGui::GetCurrentContext() != NULL &&
+              "Missing dear imgui context.");
+
+    auto &io = ImGui::GetIO();
+    auto *window = (GLFWwindow *)ImGui::GetWindowViewport()->PlatformHandle;
+
+    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootWindow)) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    } else {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        return;
+    }
+
+    /*****************/
+    /* keybord input */
+    /*****************/
+    auto deltaTime = io.DeltaTime;
+    if (ImGui::IsKeyDown(GLFW_KEY_W))
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (ImGui::IsKeyDown(GLFW_KEY_S))
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (ImGui::IsKeyDown(GLFW_KEY_A))
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (ImGui::IsKeyDown(GLFW_KEY_D))
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+
+    if (ImGui::IsKeyDown(GLFW_KEY_ESCAPE))
+        ImGui::SetNextWindowFocus();
+
+    /******************/
+    /* mouse movement */
+    /******************/
+    camera.ProcessMouseMovement(io.MouseDelta.x, -io.MouseDelta.y);
 }

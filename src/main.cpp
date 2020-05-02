@@ -239,6 +239,7 @@ int main(int, char **) {
         ImGui::Begin("Game rendering");
         {
             // OpenGL offscreen rendering
+            process_camara_input(camera);
             texId = do_offscreen_rendering(camera);
 
             // Get the current cursor position (where your window is)
