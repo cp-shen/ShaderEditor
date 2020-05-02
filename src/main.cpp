@@ -144,7 +144,7 @@ int main(int, char **) {
     // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f,
     // NULL, io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
 
-    editor_setup(editor);
+    editor_setup(editor, "resources/shaders/framebuffers.fs");
     feed_render_resources();
 
     // Main loop
@@ -279,6 +279,17 @@ void process_window_main_loop(GLFWwindow *window) {
     ImGui::End();
 
     process_editor_main_loop(editor);
+
+    // main menu bar
+    if (ImGui::BeginMainMenuBar()) {
+        if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Reload Shaders")) {
+                reload_shaders();
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
 
     // Rendering
     ImGui::Render();

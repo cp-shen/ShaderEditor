@@ -15,6 +15,7 @@ set(SHADER_EDITOR_SOURCES
     src/framebuffers.cpp
     src/renderer.cpp
     src/editor.cpp
+    src/ui.cpp
     )
 
 set(SHADER_EDITOR_HEADERS

@@ -10,7 +10,9 @@
 
 void free_render_resources();
 void feed_render_resources();
-void editor_setup(TextEditor &);
+void reload_shaders();
+void editor_setup(TextEditor &, const char *file_path);
+void editor_save_text(TextEditor &, const char *file_path);
 void process_window_main_loop(GLFWwindow *);
 void process_editor_main_loop(TextEditor &);
 GLuint do_offscreen_rendering(Camera &camera);

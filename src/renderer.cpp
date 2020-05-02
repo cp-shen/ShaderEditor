@@ -292,3 +292,9 @@ void process_camara_input(Camera &camera) {
     /******************/
     camera.ProcessMouseMovement(io.MouseDelta.x, -io.MouseDelta.y);
 }
+
+
+void reload_shaders() {
+    free_render_resources();
+    feed_render_resources();
+}

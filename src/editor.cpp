@@ -8,8 +8,8 @@
 #include <TextEditor.h>
 #include <common.h>
 
-void editor_setup(TextEditor &editor) {
-    auto lang = TextEditor::LanguageDefinition::CPlusPlus();
+void editor_setup(TextEditor &editor, const char *file_path) {
+    auto lang = TextEditor::LanguageDefinition::GLSL();
 
     // set your own known preprocessor symbols...
     static const char *ppnames[] = {"NULL",
@@ -133,16 +133,22 @@ void editor_setup(TextEditor &editor) {
     // bpts.insert(47);
     // editor.SetBreakpoints(bpts);
 
-    static const char *fileToEdit = "libs/ImGuiColorTextEdit/TextEditor.cpp";
-    //	static const char* fileToEdit = "test.cpp";
-
     {
-        std::ifstream t(fileToEdit);
+        std::ifstream t(file_path);
         if (t.good()) {
             std::string str((std::istreambuf_iterator<char>(t)),
                             std::istreambuf_iterator<char>());
             editor.SetText(str);
         }
+        t.close();
+    }
+}
+
+void editor_save_text(TextEditor &editor, const char *file_path) {
+    auto file = std::ofstream(file_path);
+    if (file.good()) {
+        file << editor.GetText();
+        file.close();
     }
 }
 
@@ -157,11 +163,14 @@ void process_editor_main_loop(TextEditor &editor) {
         if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Save")) {
-                    auto textToSave = editor.GetText();
                     /// save text....
+                    // FIXME
+                    editor_save_text(editor,
+                                     "resources/shaders/framebuffers.fs");
                 }
-                if (ImGui::MenuItem("Quit", "Alt-F4"))
+                if (ImGui::MenuItem("Quit", "Alt-F4")) {
                     /// set close window flag
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Edit")) {
@@ -224,5 +233,4 @@ void process_editor_main_loop(TextEditor &editor) {
         editor.Render("TextEditor");
     }
     ImGui::End();
-
 }
