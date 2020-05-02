@@ -12,6 +12,7 @@ void free_render_resources();
 void feed_render_resources();
 void editor_setup(TextEditor &);
 void process_window_main_loop(GLFWwindow *);
+void process_editor_main_loop(TextEditor &);
 GLuint do_offscreen_rendering(Camera &camera);
 unsigned int loadTexture(const char *path);
 void read_pixels_and_save(int w, int h, const char *path);
