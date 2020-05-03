@@ -12,20 +12,17 @@
 #include <imgui/examples/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
 
-#include <TextEditor.h>
 #include <shader_editor/common.h>
+#include <shader_editor/editor.h>
 #include <shader_editor/renderer.h>
 #include <shader_editor/ui.h>
-#include <shader_editor/editor.h>
-
-using namespace std;
 
 static GLFWwindow *window;
-static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 static void process_window_main_loop();
 static int app_init();
 static void app_destroy();
+
 static void error_callback(int error, const char *description) {
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
@@ -48,16 +45,6 @@ int main(int, char **) {
 }
 
 void process_window_main_loop() {
-    IM_ASSERT(ImGui::GetCurrentContext() != NULL &&
-              "Missing dear imgui context. Refer to examples app!");
-
-    // Our state
-    // static bool show_demo_window = true;
-    // static bool show_another_window = false;
-    // static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    ImGuiIO &io = ImGui::GetIO();
-
     glfwPollEvents();
 
     // Start the Dear ImGui frame
@@ -65,13 +52,12 @@ void process_window_main_loop() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    // update ui modules
     show_demo_window();
     show_hw_window();
     show_another_window();
     show_render_window();
-
     process_editor_main_loop();
-
     show_menu_bar();
 
     // Rendering
@@ -79,11 +65,13 @@ void process_window_main_loop() {
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     // Update and Render additional Platform Windows
+    ImGuiIO &io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         GLFWwindow *backup_current_context = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
@@ -95,7 +83,6 @@ void process_window_main_loop() {
 }
 
 static int app_init() {
-    // Setup window
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())
         return 1;
@@ -126,24 +113,7 @@ static int app_init() {
     glfwSwapInterval(1); // Enable vsync
 
     // Initialize OpenGL loader
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-    bool err = gl3wInit() != 0;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
     bool err = glewInit() != GLEW_OK;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-    bool err = gladLoadGL() == 0;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
-    bool err = false;
-    glbinding::Binding::initialize();
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING3)
-    bool err = false;
-    glbinding::initialize([](const char *name) {
-        return (glbinding::ProcAddress)glfwGetProcAddress(name);
-    });
-#else
-    bool err = false; // If you use IMGUI_IMPL_OPENGL_LOADER_CUSTOM, your loader
-                      // is likely to requires some form of initialization.
-#endif
     if (err) {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         return 1;
@@ -182,29 +152,7 @@ static int app_init() {
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can
-    // also load multiple fonts and use ImGui::PushFont()/PopFont() to select
-    // them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you
-    // need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return NULL. Please
-    // handle those errors in your application (e.g. use an assertion, or
-    // display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and
-    // stored into a texture when calling
-    // ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame
-    // below will call.
-    // - Read 'docs/FONTS.txt' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string
-    // literal you need to write a double backslash \\ !
-    // io.Fonts->AddFontDefault();
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    // io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-    // ImFont* font =
-    // io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f,
-    // NULL, io.Fonts->GetGlyphRangesJapanese()); IM_ASSERT(font != NULL);
+    // ...
 
     // init success
     return 0;

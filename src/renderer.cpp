@@ -14,9 +14,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#define SCR_WIDTH 800
-#define SCR_HEIGHT 600
-
 static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 struct render_resources_t {
