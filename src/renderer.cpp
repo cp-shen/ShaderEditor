@@ -1,18 +1,21 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <common.h>
 #include <imgui/imgui.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/filesystem.h>
 #include <learnopengl/model.h>
 #include <learnopengl/shader_m.h>
+#include <shader_editor/renderer.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#define SCR_WIDTH 800
+#define SCR_HEIGHT 600
 
 static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
@@ -303,7 +306,6 @@ void process_camara_input() {
     /******************/
     camera.ProcessMouseMovement(io.MouseDelta.x, -io.MouseDelta.y);
 }
-
 
 void reload_shaders() {
     free_render_resources();

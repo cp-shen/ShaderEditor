@@ -6,9 +6,12 @@
 #include <imgui/imgui.h>
 
 #include <TextEditor.h>
-#include <common.h>
+#include <shader_editor/common.h>
+#include <shader_editor/editor.h>
 
-void editor_setup(TextEditor &editor, const char *file_path) {
+static TextEditor editor;
+
+void editor_setup(const char *file_path) {
     auto lang = TextEditor::LanguageDefinition::GLSL();
 
     // set your own known preprocessor symbols...
@@ -144,7 +147,7 @@ void editor_setup(TextEditor &editor, const char *file_path) {
     }
 }
 
-void editor_save_text(TextEditor &editor, const char *file_path) {
+void editor_save_text(const char *file_path) {
     auto file = std::ofstream(file_path);
     if (file.good()) {
         file << editor.GetText();
@@ -152,7 +155,7 @@ void editor_save_text(TextEditor &editor, const char *file_path) {
     }
 }
 
-void process_editor_main_loop(TextEditor &editor) {
+void process_editor_main_loop() {
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2(800, 600), ImGuiCond_FirstUseEver);
     ImGui::Begin("Text Editor Demo", nullptr,
@@ -165,8 +168,7 @@ void process_editor_main_loop(TextEditor &editor) {
                 if (ImGui::MenuItem("Save")) {
                     /// save text....
                     // FIXME
-                    editor_save_text(editor,
-                                     "resources/shaders/framebuffers.fs");
+                    editor_save_text("resources/shaders/framebuffers.fs");
                 }
                 if (ImGui::MenuItem("Quit", "Alt-F4")) {
                     /// set close window flag

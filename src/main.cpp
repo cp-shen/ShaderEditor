@@ -13,15 +13,19 @@
 #include <imgui/imgui.h>
 
 #include <TextEditor.h>
-#include <common.h>
-#include <ui.h>
+#include <shader_editor/common.h>
+#include <shader_editor/renderer.h>
+#include <shader_editor/ui.h>
+#include <shader_editor/editor.h>
 
 using namespace std;
 
-static TextEditor editor;
 static GLFWwindow *window;
 static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+static void process_window_main_loop();
+static int app_init();
+static void app_destroy();
 static void error_callback(int error, const char *description) {
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
@@ -29,12 +33,12 @@ static void error_callback(int error, const char *description) {
 int main(int, char **) {
     assert(app_init() == 0 && "app init failed");
 
-    editor_setup(editor, "resources/shaders/framebuffers.fs");
+    editor_setup("resources/shaders/framebuffers.fs");
     feed_render_resources();
 
     // Main loop
     while (!glfwWindowShouldClose(window)) {
-        process_window_main_loop(window);
+        process_window_main_loop();
     }
 
     free_render_resources();
@@ -43,7 +47,7 @@ int main(int, char **) {
     return 0;
 }
 
-void process_window_main_loop(GLFWwindow *window) {
+void process_window_main_loop() {
     IM_ASSERT(ImGui::GetCurrentContext() != NULL &&
               "Missing dear imgui context. Refer to examples app!");
 
@@ -66,7 +70,7 @@ void process_window_main_loop(GLFWwindow *window) {
     show_another_window();
     show_render_window();
 
-    process_editor_main_loop(editor);
+    process_editor_main_loop();
 
     show_menu_bar();
 
@@ -90,7 +94,7 @@ void process_window_main_loop(GLFWwindow *window) {
     glfwSwapBuffers(window);
 }
 
-int app_init() {
+static int app_init() {
     // Setup window
     glfwSetErrorCallback(error_callback);
     if (!glfwInit())

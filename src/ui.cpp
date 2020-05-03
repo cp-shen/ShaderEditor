@@ -4,8 +4,9 @@
 /************************************/
 
 #include <imgui/imgui.h>
-#include <common.h>
-#include <ui.h>
+#include <shader_editor/common.h>
+#include <shader_editor/ui.h>
+#include <shader_editor/renderer.h>
 
 // Our state
 static bool b_show_demo_window = true;

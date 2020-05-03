@@ -18,7 +18,10 @@ set(SHADER_EDITOR_SOURCES
     )
 
 set(SHADER_EDITOR_HEADERS
-    include/common.h
+    include/shader_editor/common.h
+    include/shader_editor/editor.h
+    include/shader_editor/ui.h
+    include/shader_editor/renderer.h
     )
 
 add_executable(shader_editor ${SHADER_EDITOR_SOURCES} ${SHADER_EDITOR_HEADERS})
