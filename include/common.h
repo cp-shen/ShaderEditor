@@ -15,11 +15,11 @@ void editor_setup(TextEditor &, const char *file_path);
 void editor_save_text(TextEditor &, const char *file_path);
 void process_window_main_loop(GLFWwindow *);
 void process_editor_main_loop(TextEditor &);
-GLuint do_offscreen_rendering(Camera &camera);
+GLuint do_offscreen_rendering();
 unsigned int loadTexture(const char *path);
 void read_pixels_and_save(int w, int h, const char *path);
 void save_texture(int w, int h, unsigned tex, const char *path);
-void process_camara_input(Camera &camera);
+void process_camara_input();
 int app_init();
 void app_destroy();
 

@@ -11,6 +11,11 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
 struct render_resources_t {
     GLuint fbo;
     GLuint fboColorTex;
@@ -192,7 +197,7 @@ void free_render_resources() {
     delete r.screenShader;
 }
 
-GLuint do_offscreen_rendering(Camera &camera) {
+GLuint do_offscreen_rendering() {
     /*********************************/
     /* configure global opengl state */
     /*********************************/
@@ -238,6 +243,12 @@ GLuint do_offscreen_rendering(Camera &camera) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    static bool saved = false;
+    if (!saved) {
+        save_texture(SCR_WIDTH, SCR_HEIGHT, r.fboColorTex, "out.png");
+        saved = true;
+    }
+
     return r.fboColorTex;
 };
 
@@ -257,7 +268,7 @@ void save_texture(int w, int h, GLuint tex, const char *path) {
     assert(stbi_write_png(path, w, h, 3, buf, 0) && "failed to write png");
 }
 
-void process_camara_input(Camera &camera) {
+void process_camara_input() {
     IM_ASSERT(ImGui::GetCurrentContext() != NULL &&
               "Missing dear imgui context.");
 
@@ -297,4 +308,42 @@ void process_camara_input(Camera &camera) {
 void reload_shaders() {
     free_render_resources();
     feed_render_resources();
+}
+
+/*******************************************************/
+/* utility function for loading a 2D texture from file */
+/*******************************************************/
+unsigned int loadTexture(char const *path) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data) {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
+                     GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                        GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    } else {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
 }

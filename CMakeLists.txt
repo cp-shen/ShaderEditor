@@ -12,7 +12,6 @@ add_subdirectory(libs)
 
 set(SHADER_EDITOR_SOURCES
     src/main.cpp
-    src/framebuffers.cpp
     src/renderer.cpp
     src/editor.cpp
     src/ui.cpp

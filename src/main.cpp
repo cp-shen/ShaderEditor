@@ -8,26 +8,19 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-
 #include <imgui/examples/imgui_impl_glfw.h>
 #include <imgui/examples/imgui_impl_opengl3.h>
 #include <imgui/imgui.h>
 
-#include <learnopengl/camera.h>
-#include <learnopengl/filesystem.h>
-#include <learnopengl/model.h>
-#include <learnopengl/shader_m.h>
-
 #include <TextEditor.h>
 #include <common.h>
+#include <ui.h>
 
 using namespace std;
 
-static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 static TextEditor editor;
-static GLuint texId;
 static GLFWwindow *window;
+static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 static void error_callback(int error, const char *description) {
     fprintf(stderr, "Error %d: %s\n", error, description);
@@ -51,32 +44,16 @@ int main(int, char **) {
 }
 
 void process_window_main_loop(GLFWwindow *window) {
-    IM_ASSERT(
-        ImGui::GetCurrentContext() != NULL &&
-        "Missing dear imgui context. Refer to examples app!"); // Exceptionally
-                                                               // add an extra
-                                                               // assert here
-                                                               // for people
-                                                               // confused with
-                                                               // initial dear
-                                                               // imgui setup
+    IM_ASSERT(ImGui::GetCurrentContext() != NULL &&
+              "Missing dear imgui context. Refer to examples app!");
 
     // Our state
-    static bool show_demo_window = true;
-    static bool show_another_window = false;
-    static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    // static bool show_demo_window = true;
+    // static bool show_another_window = false;
+    // static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     ImGuiIO &io = ImGui::GetIO();
 
-    // Poll and handle events (inputs, window resize, etc.)
-    // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to
-    // tell if dear imgui wants to use your inputs.
-    // - When io.WantCaptureMouse is true, do not dispatch mouse input data
-    // to your main application.
-    // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input
-    // data to your main application. Generally you may always pass all
-    // inputs to dear imgui, and hide them from your application based on
-    // those two flags.
     glfwPollEvents();
 
     // Start the Dear ImGui frame
@@ -84,97 +61,14 @@ void process_window_main_loop(GLFWwindow *window) {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // 1. Show the big demo window (Most of the sample code is in
-    // ImGui::ShowDemoWindow()! You can browse its code to learn more about
-    // Dear ImGui!).
-    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
-
-    // 2. Show a simple window that we create ourselves. We use a Begin/End
-    // pair to created a named window.
-    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Hello, world!");
-    {
-        static float f = 0.0f;
-        static int counter = 0;
-
-        ImGui::Text("This is some useful text."); // Display some text (you can
-                                                  // use a format strings too)
-        ImGui::Checkbox("Demo Window",
-                        &show_demo_window); // Edit bools storing our window
-                                            // open/close state
-        ImGui::Checkbox("Another Window", &show_another_window);
-
-        ImGui::SliderFloat(
-            "float", &f, 0.0f,
-            1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::ColorEdit3(
-            "clear color",
-            (float *)&clear_color); // Edit 3 floats representing a color
-
-        if (ImGui::Button(
-                "Button")) // Buttons return true when clicked (most widgets
-                           // return true when edited/activated)
-            counter++;
-        ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
-
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                    1000.0f / ImGui::GetIO().Framerate,
-                    ImGui::GetIO().Framerate);
-    }
-    ImGui::End();
-
-    // 3. Show another simple window.
-    if (show_another_window) {
-        ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
-        ImGui::Begin(
-            "Another Window",
-            &show_another_window); // Pass a pointer to our bool variable
-                                   // (the window will have a closing button
-                                   // that will clear the bool when clicked)
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me"))
-            show_another_window = false;
-        ImGui::End();
-    }
-
-    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Game rendering");
-    {
-        // OpenGL offscreen rendering
-        process_camara_input(camera);
-        texId = do_offscreen_rendering(camera);
-
-        // Get the current cursor position (where your window is)
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-
-        // ImGui::Image((void *)texId, ImVec2(SCR_WIDTH, SCR_HEIGHT),
-        //              ImVec2(0, 0), ImVec2(1, 1));
-
-        ImGui::GetWindowDrawList()->AddImage(
-            (void *)texId, pos, ImVec2(pos.x + SCR_WIDTH, pos.y + SCR_HEIGHT),
-            ImVec2(0, 1), ImVec2(1, 0));
-    }
-    ImGui::End();
+    show_demo_window();
+    show_hw_window();
+    show_another_window();
+    show_render_window();
 
     process_editor_main_loop(editor);
 
-    // main menu bar
-    if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Reload Shaders")) {
-                reload_shaders();
-            }
-            ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
-    }
+    show_menu_bar();
 
     // Rendering
     ImGui::Render();
@@ -186,10 +80,6 @@ void process_window_main_loop(GLFWwindow *window) {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     // Update and Render additional Platform Windows
-    // (Platform functions may change the current OpenGL context, so we
-    // save/restore it to make it easier to paste this code elsewhere.
-    //  For this specific demo app we could also call
-    //  glfwMakeContextCurrent(window) directly)
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         GLFWwindow *backup_current_context = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
@@ -198,12 +88,6 @@ void process_window_main_loop(GLFWwindow *window) {
     }
 
     glfwSwapBuffers(window);
-
-    static bool saved = false;
-    if (!saved) {
-        save_texture(SCR_WIDTH, SCR_HEIGHT, texId, "out.png");
-        saved = true;
-    }
 }
 
 int app_init() {
