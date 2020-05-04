@@ -5,8 +5,8 @@
 
 #include <imgui/imgui.h>
 #include <shader_editor/common.h>
-#include <shader_editor/ui.h>
 #include <shader_editor/renderer.h>
+#include <shader_editor/ui.h>
 
 // Our state
 static bool b_show_demo_window = true;
@@ -34,7 +34,7 @@ void show_hw_window() {
                                                   // use a format strings too)
         ImGui::Checkbox("Demo Window",
                         &b_show_demo_window); // Edit bools storing our window
-                                            // open/close state
+                                              // open/close state
         ImGui::Checkbox("Another Window", &b_show_another_window);
 
         ImGui::SliderFloat(
@@ -65,8 +65,8 @@ void show_another_window() {
         ImGui::Begin(
             "Another Window",
             &b_show_another_window); // Pass a pointer to our bool variable
-                                   // (the window will have a closing button
-                                   // that will clear the bool when clicked)
+                                     // (the window will have a closing button
+                                     // that will clear the bool when clicked)
         ImGui::Text("Hello from another window!");
         if (ImGui::Button("Close Me"))
             b_show_another_window = false;
@@ -74,7 +74,7 @@ void show_another_window() {
     }
 }
 
-void show_render_window(){
+void show_render_window() {
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
     ImGui::Begin("Game rendering");
@@ -94,10 +94,9 @@ void show_render_window(){
             ImVec2(0, 1), ImVec2(1, 0));
     }
     ImGui::End();
-
 }
 
-void show_menu_bar(){
+void show_menu_bar() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Reload Shaders")) {
@@ -107,5 +106,4 @@ void show_menu_bar(){
         }
         ImGui::EndMainMenuBar();
     }
-
 }
