@@ -25,13 +25,11 @@ set(SHADER_EDITOR_SOURCES
     src/renderer.cpp
     src/mesh_feeder.cpp
     src/3rd_impl.cpp
-    src/code_editor.cpp
     ${UI_SOURCES}
     )
 
 set(SHADER_EDITOR_HEADERS
     include/shader_editor/common.h
-    include/shader_editor/code_editor.h
     include/shader_editor/ui.h
     include/shader_editor/renderer.h
     include/shader_editor/mesh_feeder.h
