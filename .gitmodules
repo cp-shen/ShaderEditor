@@ -1,10 +1,13 @@
-[submodule "libs/imgui"]
-	path = libs/imgui
+[submodule "3rdparty/imgui"]
+	path = 3rdparty/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
-[submodule "libs/stb"]
-	path = libs/stb
+[submodule "3rdparty/stb"]
+	path = 3rdparty/stb
 	url = https://github.com/nothings/stb
-[submodule "libs/ImGuiColorTextEdit"]
-	path = libs/ImGuiColorTextEdit
+[submodule "3rdparty/ImGuiColorTextEdit"]
+	path = 3rdparty/ImGuiColorTextEdit
 	url = https://github.com/BalazsJako/ImGuiColorTextEdit.git
+[submodule "3rdparty/LearnOpenGL"]
+	path = 3rdparty/LearnOpenGL
+	url = https://github.com/JoeyDeVries/LearnOpenGL.git
