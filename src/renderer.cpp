@@ -8,10 +8,7 @@
 #include <learnopengl/shader_m.h>
 #include <shader_editor/renderer.h>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
-
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));

@@ -8,13 +8,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-add_subdirectory(libs)
+add_subdirectory(3rdparty)
 
 set(SHADER_EDITOR_SOURCES
     src/main.cpp
     src/renderer.cpp
     src/editor.cpp
     src/ui.cpp
+    src/mesh_feeder.cpp
+    src/3rd_impl.cpp
     )
 
 set(SHADER_EDITOR_HEADERS
@@ -22,12 +24,13 @@ set(SHADER_EDITOR_HEADERS
     include/shader_editor/editor.h
     include/shader_editor/ui.h
     include/shader_editor/renderer.h
+    include/shader_editor/mesh_feeder.h
     )
 
 add_executable(shader_editor ${SHADER_EDITOR_SOURCES} ${SHADER_EDITOR_HEADERS})
 
 target_include_directories(shader_editor PRIVATE include)
-target_include_directories(shader_editor PRIVATE libs)
+target_include_directories(shader_editor PRIVATE 3rdparty)
 target_link_libraries(shader_editor PRIVATE imgui_glfw_opengl3)
 target_link_libraries(shader_editor PRIVATE stb)
 target_link_libraries(shader_editor PRIVATE ImGuiColorTextEdit)
