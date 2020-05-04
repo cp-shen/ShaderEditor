@@ -10,4 +10,4 @@
 	url = https://github.com/BalazsJako/ImGuiColorTextEdit.git
 [submodule "3rdparty/LearnOpenGL"]
 	path = 3rdparty/LearnOpenGL
-	url = https://github.com/JoeyDeVries/LearnOpenGL.git
+	url = https://github.com/cp-shen/LearnOpenGL
