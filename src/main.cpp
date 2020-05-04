@@ -5,7 +5,7 @@
 #include <iostream>
 #include <stdio.h>
 
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <imgui/examples/imgui_impl_glfw.h>
@@ -113,7 +113,7 @@ static int app_init() {
     glfwSwapInterval(1); // Enable vsync
 
     // Initialize OpenGL loader
-    bool err = glewInit() != GLEW_OK;
+    bool err = gladLoadGL() == 0;
     if (err) {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         return 1;

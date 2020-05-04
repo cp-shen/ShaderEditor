@@ -31,6 +31,8 @@ add_executable(shader_editor ${SHADER_EDITOR_SOURCES} ${SHADER_EDITOR_HEADERS})
 
 target_include_directories(shader_editor PRIVATE include)
 target_include_directories(shader_editor PRIVATE 3rdparty)
+
 target_link_libraries(shader_editor PRIVATE imgui_glfw_opengl3)
 target_link_libraries(shader_editor PRIVATE stb)
 target_link_libraries(shader_editor PRIVATE ImGuiColorTextEdit)
+target_link_libraries(shader_editor PRIVATE LearnOpenGL)
