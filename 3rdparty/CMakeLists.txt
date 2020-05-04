@@ -51,3 +51,9 @@ target_include_directories(ImGuiColorTextEdit PUBLIC ImGuiColorTextEdit)
 
 add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE stb)
+
+
+# learnopengl part
+# ----------------
+
+add_subdirectory(LearnOpenGL)
