@@ -30,7 +30,7 @@ static void error_callback(int error, const char *description) {
 int main(int, char **) {
     assert(app_init() == 0 && "app init failed");
 
-    editor_setup("resources/shaders/framebuffers.fs");
+    editor_setup("resources/test/framebuffers.fs");
     feed_render_resources();
 
     // Main loop

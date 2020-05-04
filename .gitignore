@@ -66,3 +66,4 @@ bin/
 .clangd/
 imgui.ini
 *.png
+resources/test/

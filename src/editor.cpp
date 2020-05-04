@@ -10,8 +10,11 @@
 #include <shader_editor/editor.h>
 
 static TextEditor editor;
+static std::string editor_file_path;
 
 void editor_setup(const char *file_path) {
+    editor_file_path = file_path;
+
     auto lang = TextEditor::LanguageDefinition::GLSL();
 
     // set your own known preprocessor symbols...
@@ -137,7 +140,7 @@ void editor_setup(const char *file_path) {
     // editor.SetBreakpoints(bpts);
 
     {
-        std::ifstream t(file_path);
+        std::ifstream t(editor_file_path);
         if (t.good()) {
             std::string str((std::istreambuf_iterator<char>(t)),
                             std::istreambuf_iterator<char>());
@@ -147,8 +150,8 @@ void editor_setup(const char *file_path) {
     }
 }
 
-void editor_save_text(const char *file_path) {
-    auto file = std::ofstream(file_path);
+static void editor_save_text() {
+    auto file = std::ofstream(editor_file_path);
     if (file.good()) {
         file << editor.GetText();
         file.close();
@@ -168,7 +171,7 @@ void process_editor_main_loop() {
                 if (ImGui::MenuItem("Save")) {
                     /// save text....
                     // FIXME
-                    editor_save_text("resources/shaders/framebuffers.fs");
+                    editor_save_text();
                 }
                 if (ImGui::MenuItem("Quit", "Alt-F4")) {
                     /// set close window flag

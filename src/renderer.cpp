@@ -37,11 +37,11 @@ void feed_render_resources() {
     /*****************************/
     /* build and compile shaders */
     /*****************************/
-    r.shader = new Shader("resources/shaders/framebuffers.vs",
-                          "resources/shaders/framebuffers.fs");
+    r.shader = new Shader("resources/test/framebuffers.vs",
+                          "resources/test/framebuffers.fs");
 
-    r.screenShader = new Shader("resources/shaders/framebuffers_screen.vs",
-                                "resources/shaders/framebuffers_screen.fs");
+    r.screenShader = new Shader("resources/test/framebuffers_screen.vs",
+                                "resources/test/framebuffers_screen.fs");
 
     /**********************/
     /* set up vertex data */
