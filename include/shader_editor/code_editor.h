@@ -7,8 +7,8 @@
 
 #include <TextEditor.h>
 
-void editor_setup(const char *file_path);
-void editor_save_text( const char *file_path);
-void process_editor_main_loop();
+void editor_setup(TextEditor &editor);
+void editor_save_text(TextEditor &editor, const char *file_path);
+void editor_load_file(TextEditor &editor, const char *file_path);
 
 #endif

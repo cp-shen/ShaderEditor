@@ -6,13 +6,12 @@
 #ifndef UI_H
 #define UI_H
 
-#include <GLFW/glfw3.h>
-
-void process_ui_main_loop();
-void show_demo_window();
-void show_hw_window();
-void show_another_window();
-void show_render_window();
 void show_menu_bar();
+void show_test_windows();
+void show_render_window();
+void show_glsl_editor_window();
+void show_log_window();
+void show_uniform_window();
+void show_vertex_input_window();
 
 #endif

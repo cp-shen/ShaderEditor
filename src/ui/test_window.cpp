@@ -1,28 +1,18 @@
-/************************************/
-/* Date Created: 2020-04-30         */
-/* Desc: top level window functions */
-/************************************/
-
 #include <imgui/imgui.h>
-#include <shader_editor/common.h>
-#include <shader_editor/renderer.h>
 #include <shader_editor/ui.h>
 
 // Our state
 static bool b_show_demo_window = true;
 static bool b_show_another_window = false;
-static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-void process_ui_main_loop() {}
-
-void show_demo_window() {
+static void show_demo_window() {
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
     if (b_show_demo_window)
         ImGui::ShowDemoWindow(&b_show_demo_window);
 }
 
-void show_hw_window() {
+static void show_hw_window() {
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
     ImGui::Begin("Hello, world!");
@@ -40,9 +30,10 @@ void show_hw_window() {
         ImGui::SliderFloat(
             "float", &f, 0.0f,
             1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
+        ImVec4 test_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
         ImGui::ColorEdit3(
             "clear color",
-            (float *)&clear_color); // Edit 3 floats representing a color
+            (float *)&test_color); // Edit 3 floats representing a color
 
         if (ImGui::Button(
                 "Button")) // Buttons return true when clicked (most widgets
@@ -58,7 +49,7 @@ void show_hw_window() {
     ImGui::End();
 }
 
-void show_another_window() {
+static void show_another_window() {
     if (b_show_another_window) {
         ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(400, 400), ImGuiCond_FirstUseEver);
@@ -74,36 +65,8 @@ void show_another_window() {
     }
 }
 
-void show_render_window() {
-    ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Game rendering");
-    {
-        // OpenGL offscreen rendering
-        process_camara_input();
-        auto texId = do_offscreen_rendering();
-
-        // Get the current cursor position (where your window is)
-        ImVec2 pos = ImGui::GetCursorScreenPos();
-
-        // ImGui::Image((void *)texId, ImVec2(SCR_WIDTH, SCR_HEIGHT),
-        //              ImVec2(0, 0), ImVec2(1, 1));
-
-        ImGui::GetWindowDrawList()->AddImage(
-            (void *)texId, pos, ImVec2(pos.x + SCR_WIDTH, pos.y + SCR_HEIGHT),
-            ImVec2(0, 1), ImVec2(1, 0));
-    }
-    ImGui::End();
-}
-
-void show_menu_bar() {
-    if (ImGui::BeginMainMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Reload Shaders")) {
-                reload_shaders();
-            }
-            ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
-    }
+void show_test_windows() {
+    show_demo_window();
+    show_hw_window();
+    show_another_window();
 }

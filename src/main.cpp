@@ -13,13 +13,13 @@
 #include <imgui/imgui.h>
 
 #include <shader_editor/common.h>
-#include <shader_editor/editor.h>
 #include <shader_editor/renderer.h>
 #include <shader_editor/ui.h>
 
 static GLFWwindow *window;
 
-static void process_window_main_loop();
+static void process_app_main_loop();
+static void process_ui_main_loop();
 static int app_init();
 static void app_destroy();
 
@@ -27,24 +27,17 @@ static void error_callback(int error, const char *description) {
     fprintf(stderr, "Error %d: %s\n", error, description);
 }
 
-int main(int, char **) {
-    assert(app_init() == 0 && "app init failed");
-
-    editor_setup("resources/test/framebuffers.fs");
-    feed_render_resources();
-
-    // Main loop
-    while (!glfwWindowShouldClose(window)) {
-        process_window_main_loop();
-    }
-
-    free_render_resources();
-
-    app_destroy();
-    return 0;
+static void process_ui_main_loop() {
+    show_menu_bar();
+    show_test_windows();
+    show_render_window();
+    show_glsl_editor_window();
+    show_log_window();
+    show_uniform_window();
+    show_vertex_input_window();
 }
 
-void process_window_main_loop() {
+static void process_app_main_loop() {
     glfwPollEvents();
 
     // Start the Dear ImGui frame
@@ -53,12 +46,7 @@ void process_window_main_loop() {
     ImGui::NewFrame();
 
     // update ui modules
-    show_demo_window();
-    show_hw_window();
-    show_another_window();
-    show_render_window();
-    process_editor_main_loop();
-    show_menu_bar();
+    process_ui_main_loop();
 
     // Rendering
     ImGui::Render();
@@ -158,7 +146,7 @@ static int app_init() {
     return 0;
 }
 
-void app_destroy() {
+static void app_destroy() {
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -166,4 +154,17 @@ void app_destroy() {
 
     glfwDestroyWindow(window);
     glfwTerminate();
+}
+
+int main(int, char **) {
+    assert(app_init() == 0 && "app init failed");
+    feed_render_resources();
+
+    while (!glfwWindowShouldClose(window)) {
+        process_app_main_loop();
+    }
+
+    free_render_resources();
+    app_destroy();
+    return 0;
 }

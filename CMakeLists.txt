@@ -10,18 +10,28 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_subdirectory(3rdparty)
 
+set(UI_SOURCES
+    src/ui/glsl_editor_window.cpp
+    src/ui/log_window.cpp
+    src/ui/render_window.cpp
+    src/ui/test_window.cpp
+    src/ui/uniform_window.cpp
+    src/ui/vertex_input_window.cpp
+    src/ui/menu_bar.cpp
+    )
+
 set(SHADER_EDITOR_SOURCES
     src/main.cpp
     src/renderer.cpp
-    src/editor.cpp
-    src/ui.cpp
     src/mesh_feeder.cpp
     src/3rd_impl.cpp
+    src/code_editor.cpp
+    ${UI_SOURCES}
     )
 
 set(SHADER_EDITOR_HEADERS
     include/shader_editor/common.h
-    include/shader_editor/editor.h
+    include/shader_editor/code_editor.h
     include/shader_editor/ui.h
     include/shader_editor/renderer.h
     include/shader_editor/mesh_feeder.h
