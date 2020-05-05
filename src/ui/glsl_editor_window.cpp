@@ -6,9 +6,6 @@
 
 #include <GLFW/glfw3.h>
 
-#define DEFAULT_VS_PATH "./test_shader.vs"
-#define DEFAULT_FS_PATH "./test_shader.fs"
-
 /*******************/
 /* state variables */
 /*******************/

@@ -10,6 +10,9 @@
 #define SCR_HEIGHT 600
 #define CLEAR_COLOR 0.1f, 0.1f, 0.1f, 1.0f
 
+#define DEFAULT_VS_PATH "./test_shader.vs"
+#define DEFAULT_FS_PATH "./test_shader.fs"
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <learnopengl/camera.h>
@@ -37,5 +40,6 @@ void add_or_set_uniform(const char *, uniform_value_t v);
 std::unordered_map<std::string, uniform_t> &get_uniforms();
 unsigned get_render_texture_id();
 Camera &get_camera();
+void renderer_init();
 
 #endif

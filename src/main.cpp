@@ -45,8 +45,11 @@ static void process_modules_main_loop() {
 }
 
 static void modules_init() {
-    LOG_MSG("modules init begin");
+    LOG_MSG("modules init begin...");
+
     mesh_feeder_init();
+    renderer_init();
+
     LOG_MSG("modules init success");
 }
 static void modules_destroy() {
@@ -70,9 +73,10 @@ static void process_app_main_loop() {
     ImGui::Render();
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, display_w, display_h);
-    ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+    glClearColor(CLEAR_COLOR);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -184,5 +188,6 @@ int main(int, char **) {
 
     modules_destroy();
     app_destroy();
+    LOG_MSG("app exit normally");
     return 0;
 }

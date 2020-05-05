@@ -3,11 +3,11 @@
 #include <shader_editor/mesh_feeder.h>
 
 static std::vector<Mesh> mesh_loaded;
-static std::vector<Model> model_loaded;
+static std::vector<Model> model_loaded; //FIXME: remove this
 
-static void add_test_mesh() {
+static void load_test_model() {
     load_model("resources/objects/backpack/backpack.obj");
-    LOG_MSG("added test mesh");
+    LOG_MSG("test model loaded");
 }
 
 /*****************/
@@ -21,10 +21,10 @@ void load_model(const char *file_path) {
 
     // TODO: optimize this
     for (auto &mesh : model_loaded.back().meshes) {
-        Mesh m = Mesh (mesh);
+        Mesh m = Mesh(mesh);
         LOG_MSG("load %d vertices.", (int)m.vertices.size());
-        mesh_loaded.push_back(m);
+        mesh_loaded.push_back(std::move(m));
     }
 }
 
-void mesh_feeder_init() { add_test_mesh(); }
+void mesh_feeder_init() { load_test_model(); }

@@ -1,14 +1,15 @@
 #include <imgui/imgui.h>
+#include <learnopengl/camera.h>
 #include <learnopengl/filesystem.h>
 #include <learnopengl/mesh.h>
-#include <learnopengl/camera.h>
 #include <learnopengl/shader_m.h>
-#include <shader_editor/renderer.h>
+#include <shader_editor/common.h>
 #include <shader_editor/mesh_feeder.h>
+#include <shader_editor/renderer.h>
 
+#include <memory>
 #include <stb_image.h>
 #include <stb_image_write.h>
-#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -25,40 +26,6 @@ static std::unordered_map<std::string, uniform_t> uniforms;
 /****************************/
 /* static utility functions */
 /****************************/
-// static unsigned int loadTexture(char const *path) {
-//     unsigned int textureID;
-//     glGenTextures(1, &textureID);
-//
-//     int width, height, nrComponents;
-//     unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-//     if (data) {
-//         GLenum format;
-//         if (nrComponents == 1)
-//             format = GL_RED;
-//         else if (nrComponents == 3)
-//             format = GL_RGB;
-//         else if (nrComponents == 4)
-//             format = GL_RGBA;
-//
-//         glBindTexture(GL_TEXTURE_2D, textureID);
-//         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
-//                      GL_UNSIGNED_BYTE, data);
-//         glGenerateMipmap(GL_TEXTURE_2D);
-//
-//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-//                         GL_LINEAR_MIPMAP_LINEAR);
-//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//
-//         stbi_image_free(data);
-//     } else {
-//         std::cout << "Texture failed to load at path: " << path << std::endl;
-//         stbi_image_free(data);
-//     }
-//
-//     return textureID;
-// }
 
 static void submit_uniforms() {
     shader->use();
@@ -135,20 +102,16 @@ static void draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void load_default_shaders(){
+    load_shaders(DEFAULT_VS_PATH, DEFAULT_FS_PATH);
+}
+
 /*****************/
 /* api functions */
 /*****************/
-
 void do_offscreen_rendering() {
-    static bool setup = false;
-    if (!setup) {
-        renderer_setup_framebuffer();
-        add_default_uniforms();
-        setup = true;
-    }
-
     if (shader == nullptr || mesh_loaded.empty())
-        return; // FIXME
+        return;
 
     submit_uniforms(); // FIXME: optimize this
     draw();
@@ -175,9 +138,10 @@ void save_texture(const char *path) {
 }
 
 void load_shaders(const char *vs, const char *fs) {
+    LOG_MSG("shader loading begin...");
     shader.reset(new Shader(vs, fs));
+    LOG_MSG("shader loading ok");
 }
-
 
 void uniform_t::submit() {
     std::visit(
@@ -223,10 +187,12 @@ void add_or_set_uniform(const char *n, uniform_value_t v) {
 
 std::unordered_map<std::string, uniform_t> &get_uniforms() { return uniforms; }
 
-unsigned get_render_texture_id(){
-    return fbo_color_tex;
-}
+unsigned get_render_texture_id() { return fbo_color_tex; }
 
-Camera &get_camera(){
-    return camera;
+Camera &get_camera() { return camera; }
+
+void renderer_init() {
+    renderer_setup_framebuffer();
+    add_default_uniforms();
+    load_default_shaders();
 }
