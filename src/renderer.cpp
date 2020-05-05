@@ -1,5 +1,6 @@
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
+#include <GLFW/glfw3.h> // must after glad is included
 
 #include <imgui/imgui.h>
 #include <learnopengl/camera.h>
@@ -8,8 +9,8 @@
 #include <learnopengl/shader_m.h>
 #include <shader_editor/renderer.h>
 
-#include <stb_image_write.h>
 #include <stb_image.h>
+#include <stb_image_write.h>
 
 static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
@@ -192,6 +193,8 @@ void free_render_resources() {
 
     delete r.shader;
     delete r.screenShader;
+
+    r.shader = r.screenShader = nullptr;
 }
 
 GLuint do_offscreen_rendering() {
@@ -301,9 +304,10 @@ void process_camara_input() {
     camera.ProcessMouseMovement(io.MouseDelta.x, -io.MouseDelta.y);
 }
 
-void reload_shaders() {
-    free_render_resources();
-    feed_render_resources();
+void reload_shaders(const char *vs, const char *fs) {
+    if (r.shader)
+        delete r.shader;
+    r.shader = new Shader(vs, fs);
 }
 
 /*******************************************************/

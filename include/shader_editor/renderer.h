@@ -11,11 +11,11 @@
 
 void free_render_resources();
 void feed_render_resources();
-void reload_shaders();
 unsigned int do_offscreen_rendering();
 unsigned int loadTexture(const char *path);
 void read_pixels_and_save(int w, int h, const char *path);
 void save_texture(int w, int h, unsigned tex, const char *path);
 void process_camara_input();
+void reload_shaders(const char *vs, const char *fs);
 
 #endif

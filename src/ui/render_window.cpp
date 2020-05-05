@@ -5,7 +5,7 @@
 void show_render_window() {
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Game rendering");
+    ImGui::Begin("Rendering");
     {
         // OpenGL offscreen rendering
         process_camara_input();

@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 
 #include <imgui/examples/imgui_impl_glfw.h>
@@ -29,8 +30,8 @@ static void error_callback(int error, const char *description) {
 
 static void process_ui_main_loop() {
     show_menu_bar();
-    show_test_windows();
     show_render_window();
+    show_test_windows();
     show_glsl_editor_window();
     show_log_window();
     show_uniform_window();
@@ -53,7 +54,7 @@ static void process_app_main_loop() {
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

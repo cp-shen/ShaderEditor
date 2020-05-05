@@ -30,9 +30,9 @@ static void show_hw_window() {
         ImGui::SliderFloat(
             "float", &f, 0.0f,
             1.0f); // Edit 1 float using a slider from 0.0f to 1.0f
-        ImVec4 test_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+        static ImVec4 test_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
         ImGui::ColorEdit3(
-            "clear color",
+            "test color",
             (float *)&test_color); // Edit 3 floats representing a color
 
         if (ImGui::Button(
