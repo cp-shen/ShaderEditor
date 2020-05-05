@@ -8,9 +8,11 @@
 
 #define SCR_WIDTH 800
 #define SCR_HEIGHT 600
+#define CLEAR_COLOR 0.1f, 0.1f, 0.1f, 1.0f
 
 #include <glm/glm.hpp>
 #include <string>
+#include <unordered_map>
 #include <variant>
 
 typedef std::variant<bool, int, float, glm::vec2, glm::vec3, glm::vec4,
@@ -32,5 +34,6 @@ void save_texture(const char *path);
 void process_camara_input();
 unsigned int do_offscreen_rendering();
 void add_or_set_uniform(const char *, uniform_value_t v);
+std::unordered_map<std::string, uniform_t> &get_uniforms();
 
 #endif

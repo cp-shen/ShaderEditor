@@ -90,7 +90,7 @@ static void add_default_uniforms() {
     add_or_set_uniform("model", model);
 }
 
-static void renderer_setup() {
+static void renderer_setup_framebuffer() {
     /*****************************/
     /* framebuffer configuration */
     /*****************************/
@@ -123,27 +123,9 @@ static void renderer_setup() {
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    add_default_uniforms();
 }
 
-/*****************/
-/* api functions */
-/*****************/
-
-unsigned do_offscreen_rendering() {
-    if (shader != nullptr || mesh_loaded.empty())
-        return 0; // FIXME
-
-    // assert(shader != nullptr);
-    // assert(mesh_loaded.empty());
-
-    static bool setup = false;
-    if (!setup)
-        renderer_setup();
-
-    submit_uniforms(); // FIXME: optimize this
-
+static void draw() {
     shader->use();
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -154,8 +136,30 @@ unsigned do_offscreen_rendering() {
         mesh_loaded[i].Draw(*shader);
 
     // make sure we clear the framebuffer's content
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(CLEAR_COLOR);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+/*****************/
+/* api functions */
+/*****************/
+
+unsigned do_offscreen_rendering() {
+    static bool setup = false;
+    if (!setup) {
+        renderer_setup_framebuffer();
+        add_default_uniforms();
+        setup = true;
+    }
+
+    if (shader != nullptr || mesh_loaded.empty())
+        return 0; // FIXME
+
+    // assert(shader != nullptr);
+    // assert(mesh_loaded.empty());
+
+    submit_uniforms(); // FIXME: optimize this
+    draw();
 
     return fbo_color_tex;
 };
@@ -265,3 +269,5 @@ void add_or_set_uniform(const char *n, uniform_value_t v) {
     else
         uniforms.at(n).value = v;
 }
+
+std::unordered_map<std::string, uniform_t> &get_uniforms() { return uniforms; }
