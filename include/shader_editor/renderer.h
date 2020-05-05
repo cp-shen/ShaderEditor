@@ -12,6 +12,7 @@
 
 #define DEFAULT_VS_PATH "./test_shader.vs"
 #define DEFAULT_FS_PATH "./test_shader.fs"
+#define DEFAULT_RENDER_OUT_PATH "./out.png"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>

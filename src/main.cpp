@@ -53,7 +53,7 @@ static void modules_init() {
     LOG_MSG("modules init success");
 }
 static void modules_destroy() {
-    // TODO
+    save_texture(DEFAULT_RENDER_OUT_PATH);
 }
 
 static void process_app_main_loop() {

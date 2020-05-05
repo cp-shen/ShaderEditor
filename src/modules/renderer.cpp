@@ -43,7 +43,6 @@ static void add_default_uniforms() {
     glm::mat4 view = camera.GetViewMatrix();
     add_or_set_uniform("view", view);
 
-    // render the loaded model
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
     // translate it down so it's at the center of the scene
