@@ -23,6 +23,8 @@ class mesh_input_t {
 };
 
 std::vector<Mesh>& get_mesh_loaded();
+void load_model(const char *);
+void mesh_feeder_init();
 
 // struct mesh_t {
 //     float *vertices;   // 3 per vertex

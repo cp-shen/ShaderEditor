@@ -31,9 +31,8 @@ struct uniform_t {
 };
 
 void load_shaders(const char *vs, const char *fs);
-void load_model(const char *);
 void save_texture(const char *path);
-unsigned int do_offscreen_rendering();
+void do_offscreen_rendering();
 void add_or_set_uniform(const char *, uniform_value_t v);
 std::unordered_map<std::string, uniform_t> &get_uniforms();
 unsigned get_render_texture_id();

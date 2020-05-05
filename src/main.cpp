@@ -15,6 +15,7 @@
 
 #include <shader_editor/common.h>
 #include <shader_editor/renderer.h>
+#include <shader_editor/mesh_feeder.h>
 #include <shader_editor/ui.h>
 
 static GLFWwindow *window;
@@ -39,11 +40,18 @@ static void process_ui_main_loop() {
 }
 
 static void process_modules_main_loop() {
+    // render to texture
     do_offscreen_rendering();
 }
 
-static void modules_init() {}
-static void modules_destroy() {}
+static void modules_init() {
+    LOG_MSG("modules init begin");
+    mesh_feeder_init();
+    LOG_MSG("modules init success");
+}
+static void modules_destroy() {
+    // TODO
+}
 
 static void process_app_main_loop() {
     glfwPollEvents();
@@ -168,11 +176,13 @@ static void app_destroy() {
 
 int main(int, char **) {
     assert(app_init() == 0 && "app init failed");
+    modules_init();
 
     while (!glfwWindowShouldClose(window)) {
         process_app_main_loop();
     }
 
+    modules_destroy();
     app_destroy();
     return 0;
 }

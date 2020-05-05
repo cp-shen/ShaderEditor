@@ -2,7 +2,6 @@
 #include <learnopengl/filesystem.h>
 #include <learnopengl/mesh.h>
 #include <learnopengl/camera.h>
-#include <learnopengl/model.h>
 #include <learnopengl/shader_m.h>
 #include <shader_editor/renderer.h>
 #include <shader_editor/mesh_feeder.h>
@@ -140,7 +139,7 @@ static void draw() {
 /* api functions */
 /*****************/
 
-unsigned do_offscreen_rendering() {
+void do_offscreen_rendering() {
     static bool setup = false;
     if (!setup) {
         renderer_setup_framebuffer();
@@ -148,16 +147,11 @@ unsigned do_offscreen_rendering() {
         setup = true;
     }
 
-    if (shader != nullptr || mesh_loaded.empty())
-        return 0; // FIXME
-
-    // assert(shader != nullptr);
-    // assert(mesh_loaded.empty());
+    if (shader == nullptr || mesh_loaded.empty())
+        return; // FIXME
 
     submit_uniforms(); // FIXME: optimize this
     draw();
-
-    return fbo_color_tex;
 };
 
 // void read_pixels_and_save(int w, int h, const char *path) {
@@ -184,9 +178,6 @@ void load_shaders(const char *vs, const char *fs) {
     shader.reset(new Shader(vs, fs));
 }
 
-void load_model(const char *file_path) {
-    mesh_loaded = std::move(Model(file_path).meshes);
-}
 
 void uniform_t::submit() {
     std::visit(
