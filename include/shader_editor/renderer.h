@@ -23,6 +23,7 @@ struct uniform_t {
     std::string name;
     uniform_value_t value;
     void submit();
+    uniform_t(const char *n, uniform_value_t v) : name(n), value(v) {}
 };
 
 void load_shaders(const char *vs, const char *fs);
@@ -30,6 +31,6 @@ void load_model(const char *);
 void save_texture(const char *path);
 void process_camara_input();
 unsigned int do_offscreen_rendering();
-void add_uniform(uniform_t u);
+void add_or_set_uniform(const char *, uniform_value_t v);
 
 #endif

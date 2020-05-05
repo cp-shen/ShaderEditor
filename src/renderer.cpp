@@ -65,6 +65,31 @@ static std::unordered_map<std::string, uniform_t> uniforms;
 //     return textureID;
 // }
 
+static void submit_uniforms() {
+    shader->use();
+    for (auto &pair : uniforms) {
+        pair.second.submit();
+    }
+}
+
+static void add_default_uniforms() {
+    glm::mat4 projection =
+        glm::perspective(glm::radians(camera.Zoom),
+                         (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    add_or_set_uniform("projection", projection);
+
+    glm::mat4 view = camera.GetViewMatrix();
+    add_or_set_uniform("view", view);
+
+    // render the loaded model
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+    // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+    // it's a bit too big for our scene, so scale it down
+    add_or_set_uniform("model", model);
+}
+
 static void renderer_setup() {
     /*****************************/
     /* framebuffer configuration */
@@ -98,13 +123,8 @@ static void renderer_setup() {
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
 
-static void submit_uniforms() {
-    shader->use();
-    for (auto &pair : uniforms) {
-        pair.second.submit();
-    }
+    add_default_uniforms();
 }
 
 /*****************/
@@ -117,6 +137,10 @@ unsigned do_offscreen_rendering() {
 
     // assert(shader != nullptr);
     // assert(mesh_loaded.empty());
+
+    static bool setup = false;
+    if (!setup)
+        renderer_setup();
 
     submit_uniforms(); // FIXME: optimize this
 
@@ -231,4 +255,13 @@ void uniform_t::submit() {
         this->value);
 }
 
-void add_uniform(uniform_t u) { uniforms.emplace(std::make_pair(u.name, u)); }
+void set_uniform_value(const char *n, uniform_value_t v) {
+    auto &u = uniforms.at(n);
+}
+
+void add_or_set_uniform(const char *n, uniform_value_t v) {
+    if (!uniforms.count(n))
+        uniforms.emplace(std::make_pair(n, uniform_t(n, v)));
+    else
+        uniforms.at(n).value = v;
+}
