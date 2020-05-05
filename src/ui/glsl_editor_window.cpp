@@ -204,7 +204,7 @@ static void append_main_menu_bar() {
             if (ImGui::MenuItem("Save and Re-Compile Shaders", "Ctrl+F5")) {
                 editor_save_text(editor_vs, editor_vs_path.c_str());
                 editor_save_text(editor_fs, editor_fs_path.c_str());
-                reload_shaders(editor_vs_path.c_str(), editor_fs_path.c_str());
+                load_shaders(editor_vs_path.c_str(), editor_fs_path.c_str());
             }
             ImGui::EndMenu();
         }
@@ -219,6 +219,6 @@ static void append_main_menu_bar() {
     if (key_down) {
         editor_save_text(editor_vs, editor_vs_path.c_str());
         editor_save_text(editor_fs, editor_fs_path.c_str());
-        reload_shaders(editor_vs_path.c_str(), editor_fs_path.c_str());
+        load_shaders(editor_vs_path.c_str(), editor_fs_path.c_str());
     }
 }

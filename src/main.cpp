@@ -159,13 +159,11 @@ static void app_destroy() {
 
 int main(int, char **) {
     assert(app_init() == 0 && "app init failed");
-    feed_render_resources();
 
     while (!glfwWindowShouldClose(window)) {
         process_app_main_loop();
     }
 
-    free_render_resources();
     app_destroy();
     return 0;
 }

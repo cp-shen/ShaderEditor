@@ -5,6 +5,7 @@
 #include <imgui/imgui.h>
 #include <learnopengl/camera.h>
 #include <learnopengl/filesystem.h>
+#include <learnopengl/mesh.h>
 #include <learnopengl/model.h>
 #include <learnopengl/shader_m.h>
 #include <shader_editor/renderer.h>
@@ -12,155 +13,75 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+/*********************************/
+/* renderer states and resources */
+/*********************************/
 static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+static std::unique_ptr<Shader> shader;
+static std::vector<Mesh> mesh_loaded;
+static unsigned fbo;
+static unsigned fbo_color_tex;
+static std::unordered_map<std::string, uniform_t> uniforms;
 
-struct render_resources_t {
-    GLuint fbo;
-    GLuint fboColorTex;
+/****************************/
+/* static utility functions */
+/****************************/
+// static unsigned int loadTexture(char const *path) {
+//     unsigned int textureID;
+//     glGenTextures(1, &textureID);
+//
+//     int width, height, nrComponents;
+//     unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+//     if (data) {
+//         GLenum format;
+//         if (nrComponents == 1)
+//             format = GL_RED;
+//         else if (nrComponents == 3)
+//             format = GL_RGB;
+//         else if (nrComponents == 4)
+//             format = GL_RGBA;
+//
+//         glBindTexture(GL_TEXTURE_2D, textureID);
+//         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
+//                      GL_UNSIGNED_BYTE, data);
+//         glGenerateMipmap(GL_TEXTURE_2D);
+//
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+//                         GL_LINEAR_MIPMAP_LINEAR);
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//         stbi_image_free(data);
+//     } else {
+//         std::cout << "Texture failed to load at path: " << path << std::endl;
+//         stbi_image_free(data);
+//     }
+//
+//     return textureID;
+// }
 
-    GLuint cubeTexture;
-    GLuint floorTexture;
-
-    GLuint cubeVAO;
-    GLuint cubeVBO;
-    GLuint planeVAO;
-    GLuint planeVBO;
-    GLuint quadVAO;
-    GLuint quadVBO;
-
-    Shader *shader;
-    Shader *screenShader;
-};
-
-static render_resources_t r;
-
-void feed_render_resources() {
-    /*****************************/
-    /* build and compile shaders */
-    /*****************************/
-    r.shader = new Shader("resources/test/framebuffers.vs",
-                          "resources/test/framebuffers.fs");
-
-    r.screenShader = new Shader("resources/test/framebuffers_screen.vs",
-                                "resources/test/framebuffers_screen.fs");
-
-    /**********************/
-    /* set up vertex data */
-    /**********************/
-    float cubeVertices[] = {
-        // positions          // texture Coords
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
-        0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-        -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
-
-        -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-        0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-        -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
-    float planeVertices[] = {
-        // positions          // texture Coords
-        5.0f, -0.5f, 5.0f,  2.0f,  0.0f,  -5.0f, -0.5f, 5.0f,
-        0.0f, 0.0f,  -5.0f, -0.5f, -5.0f, 0.0f,  2.0f,
-
-        5.0f, -0.5f, 5.0f,  2.0f,  0.0f,  -5.0f, -0.5f, -5.0f,
-        0.0f, 2.0f,  5.0f,  -0.5f, -5.0f, 2.0f,  2.0f};
-    float quadVertices[] = {// vertex attributes for a quad that fills the
-                            // entire screen in Normalized Device Coordinates.
-                            // positions   // texCoords
-                            -1.0f, 1.0f, 0.0f, 1.0f,  -1.0f, -1.0f,
-                            0.0f,  0.0f, 1.0f, -1.0f, 1.0f,  0.0f,
-
-                            -1.0f, 1.0f, 0.0f, 1.0f,  1.0f,  -1.0f,
-                            1.0f,  0.0f, 1.0f, 1.0f,  1.0f,  1.0f};
-
-    // cube VAO
-    glGenVertexArrays(1, &r.cubeVAO);
-    glGenBuffers(1, &r.cubeVBO);
-    glBindVertexArray(r.cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, r.cubeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices,
-                 GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)(3 * sizeof(float)));
-
-    // plane VAO
-    glGenVertexArrays(1, &r.planeVAO);
-    glGenBuffers(1, &r.planeVBO);
-    glBindVertexArray(r.planeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, r.planeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices,
-                 GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                          (void *)(3 * sizeof(float)));
-
-    // screen quad VAO
-    glGenVertexArrays(1, &r.quadVAO);
-    glGenBuffers(1, &r.quadVBO);
-    glBindVertexArray(r.quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, r.quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices,
-                 GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
-                          (void *)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
-                          (void *)(2 * sizeof(float)));
-
-    /*****************/
-    /* load textures */
-    /*****************/
-    r.cubeTexture = loadTexture(
-        FileSystem::getPath("resources/textures/marble.jpg").c_str());
-    r.floorTexture = loadTexture(
-        FileSystem::getPath("resources/textures/metal.png").c_str());
-
-    /************************/
-    /* shader configuration */
-    /************************/
-    r.shader->use();
-    r.shader->setInt("texture1", 0);
-
-    r.screenShader->use();
-    r.screenShader->setInt("screenTexture", 0);
-
+static void renderer_setup() {
     /*****************************/
     /* framebuffer configuration */
     /*****************************/
-    glGenFramebuffers(1, &r.fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, r.fbo);
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
     // create a color attachment texture
-    glGenTextures(1, &r.fboColorTex);
-    glBindTexture(GL_TEXTURE_2D, r.fboColorTex);
+    glGenTextures(1, &fbo_color_tex);
+    glBindTexture(GL_TEXTURE_2D, fbo_color_tex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB,
                  GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                           r.fboColorTex, 0);
+                           fbo_color_tex, 0);
+
     // create a renderbuffer object for depth and stencil attachment (we won't
     // be sampling these)
     unsigned int rbo;
@@ -171,6 +92,7 @@ void feed_render_resources() {
                                        // both a depth AND stencil buffer.
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                               GL_RENDERBUFFER, rbo); // now actually attach it
+
     // now that we actually created the framebuffer and added all attachments we
     // want to check if it is actually complete now
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -178,93 +100,59 @@ void feed_render_resources() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void free_render_resources() {
-    glDeleteVertexArrays(1, &r.cubeVAO);
-    glDeleteVertexArrays(1, &r.planeVAO);
-    glDeleteVertexArrays(1, &r.quadVAO);
-    glDeleteBuffers(1, &r.cubeVBO);
-    glDeleteBuffers(1, &r.planeVBO);
-    glDeleteBuffers(1, &r.quadVBO);
-
-    glDeleteRenderbuffers(1, &r.fbo);
-
-    GLuint textures[] = {r.fboColorTex, r.cubeTexture, r.floorTexture};
-    glDeleteTextures(3, textures);
-
-    delete r.shader;
-    delete r.screenShader;
-
-    r.shader = r.screenShader = nullptr;
+static void submit_uniforms() {
+    shader->use();
+    for (auto &pair : uniforms) {
+        pair.second.submit();
+    }
 }
 
-GLuint do_offscreen_rendering() {
-    /*********************************/
-    /* configure global opengl state */
-    /*********************************/
-    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+/*****************/
+/* api functions */
+/*****************/
 
-    // render
-    // ------
-    // bind to framebuffer and draw scene as we normally would to color
-    // texture
-    glBindFramebuffer(GL_FRAMEBUFFER, r.fbo);
-    glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for
-                             // rendering screen-space quad)
+unsigned do_offscreen_rendering() {
+    if (shader != nullptr || mesh_loaded.empty())
+        return 0; // FIXME
+
+    // assert(shader != nullptr);
+    // assert(mesh_loaded.empty());
+
+    submit_uniforms(); // FIXME: optimize this
+
+    shader->use();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+    glEnable(GL_DEPTH_TEST);
+
+    for (unsigned i = 0; i < mesh_loaded.size(); i++)
+        mesh_loaded[i].Draw(*shader);
 
     // make sure we clear the framebuffer's content
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    r.shader->use();
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = camera.GetViewMatrix();
-    glm::mat4 projection =
-        glm::perspective(glm::radians(camera.Zoom),
-                         (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    r.shader->setMat4("view", view);
-    r.shader->setMat4("projection", projection);
-    // cubes
-    glBindVertexArray(r.cubeVAO);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, r.cubeTexture);
-    model = glm::translate(model, glm::vec3(-1.0f, 0.0f, -1.0f));
-    r.shader->setMat4("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-    r.shader->setMat4("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    // floor
-    glBindVertexArray(r.planeVAO);
-    glBindTexture(GL_TEXTURE_2D, r.floorTexture);
-    r.shader->setMat4("model", glm::mat4(1.0f));
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    static bool saved = false;
-    if (!saved) {
-        save_texture(SCR_WIDTH, SCR_HEIGHT, r.fboColorTex, "out.png");
-        saved = true;
-    }
-
-    return r.fboColorTex;
+    return fbo_color_tex;
 };
 
-void read_pixels_and_save(int w, int h, const char *path) {
-    stbi_flip_vertically_on_write(1);
-    GLsizei bufSize = w * h * 3;
-    GLubyte buf[bufSize];
-    glReadnPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, bufSize, buf);
-    assert(stbi_write_png(path, w, h, 3, buf, 0) && "failed to write png");
-}
+// void read_pixels_and_save(int w, int h, const char *path) {
+//     stbi_flip_vertically_on_write(1);
+//     GLsizei bufSize = w * h * 3;
+//     GLubyte buf[bufSize];
+//     glReadnPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, bufSize, buf);
+//     assert(stbi_write_png(path, w, h, 3, buf, 0) && "failed to write png");
+// }
 
-void save_texture(int w, int h, GLuint tex, const char *path) {
+void save_texture(const char *path) {
     stbi_flip_vertically_on_write(1);
+
+    unsigned w = SCR_WIDTH;
+    unsigned h = SCR_HEIGHT;
     GLsizei bufSize = w * h * 3;
+
     GLubyte buf[bufSize];
-    glGetTextureImage(tex, 0, GL_RGB, GL_UNSIGNED_BYTE, bufSize, buf);
+    glGetTextureImage(fbo_color_tex, 0, GL_RGB, GL_UNSIGNED_BYTE, bufSize, buf);
     assert(stbi_write_png(path, w, h, 3, buf, 0) && "failed to write png");
 }
 
@@ -304,46 +192,43 @@ void process_camara_input() {
     camera.ProcessMouseMovement(io.MouseDelta.x, -io.MouseDelta.y);
 }
 
-void reload_shaders(const char *vs, const char *fs) {
-    if (r.shader)
-        delete r.shader;
-    r.shader = new Shader(vs, fs);
+void load_shaders(const char *vs, const char *fs) {
+    shader.reset(new Shader(vs, fs));
 }
 
-/*******************************************************/
-/* utility function for loading a 2D texture from file */
-/*******************************************************/
-unsigned int loadTexture(char const *path) {
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data) {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
-                     GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                        GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    } else {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
+void load_model(const char *file_path) {
+    mesh_loaded = std::move(Model(file_path).meshes);
 }
+
+void uniform_t::submit() {
+    std::visit(
+        [this](auto &&v) {
+            using T = std::decay_t<decltype(v)>;
+            if constexpr (std::is_same_v<T, int>)
+                shader->setInt(this->name, v);
+            else if constexpr (std::is_same_v<T, bool>)
+                shader->setBool(this->name, v);
+            else if constexpr (std::is_same_v<T, int>)
+                shader->setInt(this->name, v);
+            else if constexpr (std::is_same_v<T, float>)
+                shader->setFloat(this->name, v);
+            else if constexpr (std::is_same_v<T, glm::vec2>)
+                shader->setVec2(this->name, v);
+            else if constexpr (std::is_same_v<T, glm::vec3>)
+                shader->setVec3(this->name, v);
+            else if constexpr (std::is_same_v<T, glm::vec4>)
+                shader->setVec4(this->name, v);
+            else if constexpr (std::is_same_v<T, glm::mat2>)
+                shader->setMat2(this->name, v);
+            else if constexpr (std::is_same_v<T, glm::mat3>)
+                shader->setMat3(this->name, v);
+            else if constexpr (std::is_same_v<T, glm::mat4>)
+                shader->setMat4(this->name, v);
+            else
+                static_assert(always_false<T>::value,
+                              "non-exhaustive visitor!");
+        },
+        this->value);
+}
+
+void add_uniform(uniform_t u) { uniforms.emplace(std::make_pair(u.name, u)); }
