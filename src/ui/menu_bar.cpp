@@ -1,7 +1,8 @@
-#include <GLFW/glfw3.h>
 #include <imgui/imgui.h>
 #include <shader_editor/renderer.h>
 #include <shader_editor/ui.h>
+
+#include <GLFW/glfw3.h>
 
 void show_menu_bar() {
     if (ImGui::BeginMainMenuBar()) {

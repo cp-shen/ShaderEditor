@@ -12,6 +12,6 @@ void show_render_window();
 void show_glsl_editor_window();
 void show_log_window();
 void show_uniform_window();
-void show_vertex_input_window();
+void show_mesh_input_window();
 
 #endif

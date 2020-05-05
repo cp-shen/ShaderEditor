@@ -35,8 +35,15 @@ static void process_ui_main_loop() {
     show_glsl_editor_window();
     show_log_window();
     show_uniform_window();
-    show_vertex_input_window();
+    show_mesh_input_window();
 }
+
+static void process_modules_main_loop() {
+    do_offscreen_rendering();
+}
+
+static void modules_init() {}
+static void modules_destroy() {}
 
 static void process_app_main_loop() {
     glfwPollEvents();
@@ -46,7 +53,9 @@ static void process_app_main_loop() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // update ui modules
+    // update modules
+    process_modules_main_loop();
+    // update ui
     process_ui_main_loop();
 
     // Rendering

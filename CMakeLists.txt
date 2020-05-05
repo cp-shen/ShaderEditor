@@ -16,16 +16,20 @@ set(UI_SOURCES
     src/ui/render_window.cpp
     src/ui/test_window.cpp
     src/ui/uniform_window.cpp
-    src/ui/vertex_input_window.cpp
+    src/ui/mesh_input_window.cpp
     src/ui/menu_bar.cpp
+    )
+
+set(MODULES_SOURCES
+    src/modules/mesh_feeder.cpp
+    src/modules/renderer.cpp
     )
 
 set(SHADER_EDITOR_SOURCES
     src/main.cpp
-    src/renderer.cpp
-    src/mesh_feeder.cpp
     src/3rd_impl.cpp
     ${UI_SOURCES}
+    ${MODULES_SOURCES}
     )
 
 set(SHADER_EDITOR_HEADERS

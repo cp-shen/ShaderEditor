@@ -1,18 +1,14 @@
-#include <glad/glad.h>
-
-#include <GLFW/glfw3.h> // must after glad is included
-
 #include <imgui/imgui.h>
-#include <learnopengl/camera.h>
 #include <learnopengl/filesystem.h>
 #include <learnopengl/mesh.h>
+#include <learnopengl/camera.h>
 #include <learnopengl/model.h>
 #include <learnopengl/shader_m.h>
 #include <shader_editor/renderer.h>
+#include <shader_editor/mesh_feeder.h>
 
 #include <stb_image.h>
 #include <stb_image_write.h>
-
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -22,7 +18,7 @@
 /*********************************/
 static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 static std::unique_ptr<Shader> shader;
-static std::vector<Mesh> mesh_loaded;
+static std::vector<Mesh> &mesh_loaded = get_mesh_loaded();
 static unsigned fbo;
 static unsigned fbo_color_tex;
 static std::unordered_map<std::string, uniform_t> uniforms;
@@ -184,42 +180,6 @@ void save_texture(const char *path) {
     assert(stbi_write_png(path, w, h, 3, buf, 0) && "failed to write png");
 }
 
-void process_camara_input() {
-    IM_ASSERT(ImGui::GetCurrentContext() != NULL &&
-              "Missing dear imgui context.");
-
-    auto &io = ImGui::GetIO();
-    auto *window = (GLFWwindow *)ImGui::GetWindowViewport()->PlatformHandle;
-
-    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootWindow)) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    } else {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        return;
-    }
-
-    /*****************/
-    /* keybord input */
-    /*****************/
-    auto deltaTime = io.DeltaTime;
-    if (ImGui::IsKeyDown(GLFW_KEY_W))
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (ImGui::IsKeyDown(GLFW_KEY_S))
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (ImGui::IsKeyDown(GLFW_KEY_A))
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (ImGui::IsKeyDown(GLFW_KEY_D))
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-
-    if (ImGui::IsKeyDown(GLFW_KEY_ESCAPE))
-        ImGui::SetNextWindowFocus();
-
-    /******************/
-    /* mouse movement */
-    /******************/
-    camera.ProcessMouseMovement(io.MouseDelta.x, -io.MouseDelta.y);
-}
-
 void load_shaders(const char *vs, const char *fs) {
     shader.reset(new Shader(vs, fs));
 }
@@ -271,3 +231,11 @@ void add_or_set_uniform(const char *n, uniform_value_t v) {
 }
 
 std::unordered_map<std::string, uniform_t> &get_uniforms() { return uniforms; }
+
+unsigned get_render_texture_id(){
+    return fbo_color_tex;
+}
+
+Camera &get_camera(){
+    return camera;
+}

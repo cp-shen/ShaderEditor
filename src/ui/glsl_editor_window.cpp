@@ -1,9 +1,10 @@
-#include <GLFW/glfw3.h>
 #include <TextEditor.h>
 #include <fstream>
 #include <imgui/imgui.h>
 #include <shader_editor/renderer.h>
 #include <shader_editor/ui.h>
+
+#include <GLFW/glfw3.h>
 
 #define DEFAULT_VS_PATH "./test_shader.vs"
 #define DEFAULT_FS_PATH "./test_shader.fs"

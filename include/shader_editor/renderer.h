@@ -10,7 +10,9 @@
 #define SCR_HEIGHT 600
 #define CLEAR_COLOR 0.1f, 0.1f, 0.1f, 1.0f
 
+#include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <learnopengl/camera.h>
 #include <string>
 #include <unordered_map>
 #include <variant>
@@ -31,9 +33,10 @@ struct uniform_t {
 void load_shaders(const char *vs, const char *fs);
 void load_model(const char *);
 void save_texture(const char *path);
-void process_camara_input();
 unsigned int do_offscreen_rendering();
 void add_or_set_uniform(const char *, uniform_value_t v);
 std::unordered_map<std::string, uniform_t> &get_uniforms();
+unsigned get_render_texture_id();
+Camera &get_camera();
 
 #endif
