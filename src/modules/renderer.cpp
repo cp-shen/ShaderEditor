@@ -34,7 +34,7 @@ static void submit_uniforms() {
     }
 }
 
-static void add_default_uniforms() {
+static void update_camera_uniforms() {
     glm::mat4 projection =
         glm::perspective(glm::radians(camera.Zoom),
                          (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -112,6 +112,7 @@ void do_offscreen_rendering() {
     if (shader == nullptr || mesh_loaded.empty())
         return;
 
+    update_camera_uniforms();
     submit_uniforms(); // FIXME: optimize this
     draw();
 };
@@ -192,6 +193,5 @@ Camera &get_camera() { return camera; }
 
 void renderer_init() {
     renderer_setup_framebuffer();
-    add_default_uniforms();
     load_default_shaders();
 }
