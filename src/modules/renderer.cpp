@@ -199,3 +199,5 @@ void renderer_init() {
     renderer_setup_framebuffer();
     load_default_shaders();
 }
+
+void reset_camara() { camera = Camera (glm::vec3(0.0f, 0.0f, 3.0f)); }

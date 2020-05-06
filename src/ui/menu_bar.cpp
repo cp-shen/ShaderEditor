@@ -14,6 +14,14 @@ void show_menu_bar() {
             }
             ImGui::EndMenu();
         }
+
+        if (ImGui::BeginMenu("Edit")) {
+            if (ImGui::MenuItem("Reset Camara")) {
+                reset_camara();
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMainMenuBar();
     }
 }

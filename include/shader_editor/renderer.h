@@ -42,5 +42,6 @@ std::unordered_map<std::string, uniform_t> &get_uniforms();
 unsigned get_render_texture_id();
 Camera &get_camera();
 void renderer_init();
+void reset_camara();
 
 #endif
