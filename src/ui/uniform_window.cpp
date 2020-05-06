@@ -22,6 +22,8 @@ static void show_uniform_vec4(uniform_t &uniform) {
 }
 
 static void show_uniform(uniform_t &uniform) {
+    ImGui::SetNextItemOpen(true, ImGuiCond_Once);                  // set next TreeNode/CollapsingHeader open state.
+
     if (ImGui::TreeNode(uniform.name.c_str())) {
         std::visit(
             [&uniform](auto &&v) {

@@ -43,12 +43,11 @@ void show_render_window() {
 
     ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Rendering");
+    ImGui::Begin("Renderer Out");
     {
         process_camara_input();
 
         // OpenGL offscreen rendering
-        // auto texId = do_offscreen_rendering();
         auto texId = get_render_texture_id();
 
         // Get the current cursor position (where your window is)
