@@ -16,6 +16,11 @@ static void show_uniform_mat4(uniform_t &uniform) {
     ImGui::InputFloat4("col3", &col3[0]);
 }
 
+static void show_uniform_vec4(uniform_t &uniform) {
+    auto &vec4 = std::get<glm::vec4>(uniform.value);
+    ImGui::InputFloat4("vec4", &vec4[0]);
+}
+
 static void show_uniform(uniform_t &uniform) {
     if (ImGui::TreeNode(uniform.name.c_str())) {
         std::visit(
@@ -35,7 +40,7 @@ static void show_uniform(uniform_t &uniform) {
                 else if constexpr (std::is_same_v<T, glm::vec3>)
                     ;
                 else if constexpr (std::is_same_v<T, glm::vec4>)
-                    ;
+                    show_uniform_vec4(uniform);
                 else if constexpr (std::is_same_v<T, glm::mat2>)
                     ;
                 else if constexpr (std::is_same_v<T, glm::mat3>)

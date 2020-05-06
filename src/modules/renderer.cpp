@@ -112,6 +112,9 @@ static void add_default_uniforms() {
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
     // it's a bit too big for our scene, so scale it down
     add_or_set_uniform("model", model);
+
+    // color tint in fragment shader
+    add_or_set_uniform("colortint", glm::vec4(1.f));
 }
 
 /*****************/
