@@ -34,20 +34,8 @@ static void submit_uniforms() {
 }
 
 static void update_camera_uniforms() {
-    glm::mat4 projection =
-        glm::perspective(glm::radians(camera.Zoom),
-                         (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    add_or_set_uniform("projection", projection);
-
     glm::mat4 view = camera.GetViewMatrix();
     add_or_set_uniform("view", view);
-
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-    // translate it down so it's at the center of the scene
-    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
-    // it's a bit too big for our scene, so scale it down
-    add_or_set_uniform("model", model);
 }
 
 static void renderer_setup_framebuffer() {
@@ -108,6 +96,23 @@ static void draw() {
 }
 
 void load_default_shaders() { load_shaders(DEFAULT_VS_PATH, DEFAULT_FS_PATH); }
+
+static void add_default_uniforms() {
+    glm::mat4 projection =
+        glm::perspective(glm::radians(camera.Zoom),
+                         (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    add_or_set_uniform("projection", projection);
+
+    glm::mat4 view = camera.GetViewMatrix();
+    add_or_set_uniform("view", view);
+
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+    // translate it down so it's at the center of the scene
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+    // it's a bit too big for our scene, so scale it down
+    add_or_set_uniform("model", model);
+}
 
 /*****************/
 /* api functions */
@@ -198,6 +203,7 @@ Camera &get_camera() { return camera; }
 void renderer_init() {
     renderer_setup_framebuffer();
     load_default_shaders();
+    add_default_uniforms();
 }
 
 void reset_camara() { camera = Camera (glm::vec3(0.0f, 0.0f, 3.0f)); }

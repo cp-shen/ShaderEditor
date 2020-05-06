@@ -10,8 +10,8 @@
 #include <imgui/imgui.h>
 
 #include <shader_editor/common.h>
-#include <shader_editor/renderer.h>
 #include <shader_editor/mesh_feeder.h>
+#include <shader_editor/renderer.h>
 #include <shader_editor/ui.h>
 
 static GLFWwindow *window;
@@ -48,9 +48,7 @@ static void modules_init() {
 
     LOG_MSG("modules init success");
 }
-static void modules_destroy() {
-    save_texture(DEFAULT_RENDER_OUT_PATH);
-}
+static void modules_destroy() { save_texture(DEFAULT_RENDER_OUT_PATH); }
 
 static void process_app_main_loop() {
     glfwPollEvents();
@@ -111,8 +109,7 @@ static int app_init() {
 #endif
 
     // Create window with graphics context
-    window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example",
-                              NULL, NULL);
+    window = glfwCreateWindow(1280, 720, "Shader Editor", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
