@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstring> //memset
 #include <learnopengl/mesh.h>
+#include <learnopengl/model.h>
 #include <memory>
 #include <vector>
 
@@ -22,7 +23,8 @@ class mesh_input_t {
     mesh_input_enum type;
 };
 
-std::vector<Mesh>& get_mesh_loaded();
+std::vector<Mesh> &get_mesh_loaded();
+std::vector<Model> &get_model_loaded();
 void load_model(const char *);
 void mesh_feeder_init();
 

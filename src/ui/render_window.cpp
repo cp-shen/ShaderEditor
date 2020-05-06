@@ -1,6 +1,7 @@
 #include <imgui/imgui.h>
 #include <shader_editor/renderer.h>
 #include <shader_editor/ui.h>
+#include <shader_editor/common.h>
 
 #include <GLFW/glfw3.h> // must after glad is included
 

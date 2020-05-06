@@ -18,7 +18,6 @@
 /*********************************/
 static Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 static std::unique_ptr<Shader> shader;
-static std::vector<Mesh> &mesh_loaded = get_mesh_loaded();
 static unsigned fbo;
 static unsigned fbo_color_tex;
 static std::unordered_map<std::string, uniform_t> uniforms;
@@ -93,23 +92,28 @@ static void draw() {
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
     glEnable(GL_DEPTH_TEST);
 
-    for (unsigned i = 0; i < mesh_loaded.size(); i++)
-        mesh_loaded[i].Draw(*shader);
-
     // make sure we clear the framebuffer's content
     glClearColor(CLEAR_COLOR);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // draw meshes
+    // auto &meshes = get_mesh_loaded();
+    // for (unsigned i = 0; i < meshes.size(); i++)
+    //     meshes[i].Draw(*shader);
+
+    // draw models
+    auto &models = get_model_loaded();
+    for (unsigned i = 0; i < models.size(); i++)
+        models[i].Draw(*shader);
 }
 
-void load_default_shaders(){
-    load_shaders(DEFAULT_VS_PATH, DEFAULT_FS_PATH);
-}
+void load_default_shaders() { load_shaders(DEFAULT_VS_PATH, DEFAULT_FS_PATH); }
 
 /*****************/
 /* api functions */
 /*****************/
 void do_offscreen_rendering() {
-    if (shader == nullptr || mesh_loaded.empty())
+    if (shader == nullptr)
         return;
 
     update_camera_uniforms();

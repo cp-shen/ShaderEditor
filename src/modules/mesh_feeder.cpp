@@ -1,9 +1,8 @@
-#include <learnopengl/model.h>
 #include <shader_editor/common.h>
 #include <shader_editor/mesh_feeder.h>
 
 static std::vector<Mesh> mesh_loaded;
-static std::vector<Model> model_loaded; //FIXME: remove this
+static std::vector<Model> model_loaded; // FIXME: remove this
 
 static void load_test_model() {
     load_model("resources/objects/backpack/backpack.obj");
@@ -13,8 +12,6 @@ static void load_test_model() {
 /*****************/
 /* API functions */
 /*****************/
-
-std::vector<Mesh> &get_mesh_loaded() { return mesh_loaded; }
 
 void load_model(const char *file_path) {
     model_loaded.emplace_back(file_path);
@@ -28,3 +25,7 @@ void load_model(const char *file_path) {
 }
 
 void mesh_feeder_init() { load_test_model(); }
+
+std::vector<Model> &get_model_loaded() { return model_loaded; }
+
+std::vector<Mesh> &get_mesh_loaded() { return mesh_loaded; }
