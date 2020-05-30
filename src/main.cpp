@@ -28,9 +28,9 @@ static void error_callback(int error, const char *description) {
 static void process_ui_main_loop() {
     show_menu_bar();
     show_render_window();
-    show_test_windows();
-    show_glsl_editor_window();
+    // show_test_windows();
     show_log_window();
+    show_glsl_editor_window();
     show_uniform_window();
     show_mesh_input_window();
 }
