@@ -59,10 +59,14 @@ _deps
 
 # End of https://www.gitignore.io/api/cmake
 
-tags
+tags*
 DevLog.md
 bin/
 .clangd/
 imgui.ini
 *.png
 resources/test/
+.idea
+cmake-build-*/
+build/
+3rdparty/vcpkg/
